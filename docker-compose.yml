@@ -1,0 +1,25 @@
+services:
+  backend:
+    container_name: jcs-backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    working_dir: /app
+    volumes:
+      - ./backend:/app
+    command: run --allow-net --allow-read main.ts
+    ports:
+      - "8000:8000"
+
+  frontend:
+    container_name: jcs-frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    command: sh -c "npm install && npm run dev"
+    ports:
+      - "5173:5173"
+
