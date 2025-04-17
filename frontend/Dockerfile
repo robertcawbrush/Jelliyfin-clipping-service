@@ -8,7 +8,7 @@ WORKDIR /app
 LABEL name="jcs-frontend"
 
 # Copy package.json and package-lock.json to the working directory
-COPY package*.json ./
+COPY package.json yarn.lock ./
 
 # Install dependencies
 RUN npm install
@@ -20,5 +20,5 @@ COPY . .
 EXPOSE 5173
 
 # Define the default command to run the application
-CMD ["npm", "run", "dev"]
+CMD ["yarn", "dev", "--host"]
 

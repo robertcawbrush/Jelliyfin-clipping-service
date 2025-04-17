@@ -1,28 +1,206 @@
-import js from '@eslint/js'
-import globals from 'globals'
-import reactHooks from 'eslint-plugin-react-hooks'
-import reactRefresh from 'eslint-plugin-react-refresh'
-import tseslint from 'typescript-eslint'
+import js from '@eslint/js';
+import globals from 'globals';
+import reactHooks from 'eslint-plugin-react-hooks';
+import reactRefresh from 'eslint-plugin-react-refresh';
+import tseslint from 'typescript-eslint';
+import prettier from 'eslint-plugin-prettier';
 
 export default tseslint.config(
-  { ignores: ['dist'] },
-  {
-    extends: [js.configs.recommended, ...tseslint.configs.recommended],
-    files: ['**/*.{ts,tsx}'],
-    languageOptions: {
-      ecmaVersion: 2020,
-      globals: globals.browser,
+    { ignores: ['dist'] },
+    {
+        extends: [
+            js.configs.recommended,
+            ...tseslint.configs.recommended,
+            'plugin:react/recommended',
+            'plugin:prettier/recommended',
+        ],
+        files: ['**/*.{ts,tsx}'],
+        languageOptions: {
+            ecmaVersion: 2020,
+            globals: globals.browser,
+        },
+        plugins: {
+            'react-hooks': reactHooks,
+            'react-refresh': reactRefresh,
+            prettier,
+        },
+        rules: {
+            ...reactHooks.configs.recommended.rules,
+            'react-refresh/only-export-components': [
+                'warn',
+                { allowConstantExport: true },
+            ],
+            'prettier/prettier': 'error',
+            'import/extensions': [
+                'error',
+                'ignorePackages',
+                {
+                    js: 'never',
+                    jsx: 'never',
+                    ts: 'never',
+                    tsx: 'never',
+                },
+            ],
+            'arrow-body-style': 'off',
+            'react/function-component-definition': 'off',
+            'class-methods-use-this': 'off',
+            'arrow-parens': [
+                2,
+                'as-needed',
+                {
+                    requireForBlockBody: true,
+                },
+            ],
+            camelcase: 0,
+            'comma-dangle': [2, 'never'],
+            'jsx-a11y/label-has-for': [
+                2,
+                {
+                    required: {
+                        every: ['id'],
+                    },
+                },
+            ],
+            'jsx-quotes': [2, 'prefer-double'],
+            'max-len': [
+                2,
+                250,
+                2,
+                {
+                    ignoreUrls: true,
+                    ignoreComments: true,
+                },
+            ],
+            'no-multiple-empty-lines': [
+                2,
+                {
+                    max: 2,
+                    maxEOF: 1,
+                },
+            ],
+            'no-param-reassign': [
+                2,
+                {
+                    props: false,
+                },
+            ],
+            quotes: [2, 'single'],
+            'sort-class-members/sort-class-members': [
+                2,
+                {
+                    order: [
+                        '[static-properties]',
+                        '[static-methods]',
+                        '[lifecycle]',
+                        '/^on.*$/',
+                        '[everything-else]',
+                        '/^render.+$/',
+                        'render',
+                    ],
+                    groups: {
+                        lifecycle: [
+                            'displayName',
+                            'propTypes',
+                            'contextTypes',
+                            'childContextTypes',
+                            'mixins',
+                            'statics',
+                            'defaultProps',
+                            'constructor',
+                            'getDefaultProps',
+                            'getInitialState',
+                            'state',
+                            'getChildContext',
+                            'componentWillMount',
+                            'componentDidMount',
+                            'componentWillReceiveProps',
+                            'shouldComponentUpdate',
+                            'componentWillUpdate',
+                            'componentDidUpdate',
+                            'componentWillUnmount',
+                        ],
+                    },
+                },
+            ],
+            strict: [2, 'never'],
+            'block-scoped-var': 1,
+            'dot-notation': 1,
+            indent: [
+                1,
+                2,
+                {
+                    SwitchCase: 1,
+                    ignoreComments: true,
+                },
+            ],
+            'no-else-return': 1,
+            'no-extra-bind': 1,
+            'no-lone-blocks': 1,
+            'no-loop-func': 1,
+            'no-undef': 1,
+            'no-unused-vars': 'off',
+            'vars-on-top': 1,
+            'array-bracket-spacing': 0,
+            'func-names': 0,
+            'function-paren-newline': 0,
+            'import/no-cycle': 0,
+            'jsx-a11y/label-has-associated-control': 0,
+            'jsx-a11y/control-has-associated-label': 0,
+            'key-spacing': 0,
+            'no-console': 0,
+            'no-multi-spaces': 0,
+            'no-restricted-globals': 0,
+            'no-underscore-dangle': 0,
+            'object-curly-newline': 0,
+            'object-curly-spacing': 1,
+            'one-var': 0,
+            'operator-linebreak': 0,
+            'padded-blocks': 0,
+            'prefer-const': 1,
+            'prefer-destructuring': 0,
+            'prefer-object-spread': 0,
+            'prefer-promise-reject-errors': 0,
+            'no-plusplus': 0,
+            'react/button-has-type': 0,
+            'react/default-props-match-prop-types': 0,
+            'react/destructuring-assignment': 0,
+            'react/forbid-prop-types': 0,
+            'react/jsx-closing-tag-location': 0,
+            'react/jsx-closing-bracket-location': 0,
+            'react/jsx-filename-extension': 0,
+            'react/jsx-fragments': 0,
+            'react/jsx-no-bind': 0,
+            'react/jsx-one-expression-per-line': 0,
+            'react/no-access-state-in-setstate': 0,
+            'react/no-unused-state': 0,
+            'react/prefer-stateless-function': 0,
+            'react/prop-types': 0,
+            'react/jsx-props-no-spreading': 0,
+            'react/static-property-placement': [1, 'static public field'],
+            'space-before-function-paren': 0,
+            'space-in-parens': 0,
+            'spaced-comment': 0,
+            'no-spaced-func': 0,
+            'func-call-spacing': 0,
+            'linebreak-style': ['error', 'unix'],
+            'no-shadow': 'off',
+            '@typescript-eslint/no-unused-vars': [
+                'error',
+                {
+                    varsIgnorePattern: 'React',
+                },
+            ],
+            '@typescript-eslint/no-shadow': 'error',
+            'react/require-default-props': 'off',
+            'react/no-unstable-nested-components': 'off',
+            'import/no-extraneous-dependencies': 0,
+            'import/prefer-default-export': 0,
+            '@typescript-eslint/ban-ts-comment': 0,
+            'react/no-array-index-key': 0,
+            'array-callback-return': 0,
+            'consistent-return': 0,
+            '@typescript-eslint/no-explicit-any': 'off',
+            'no-trailing-spaces': 'error',
+        },
     },
-    plugins: {
-      'react-hooks': reactHooks,
-      'react-refresh': reactRefresh,
-    },
-    rules: {
-      ...reactHooks.configs.recommended.rules,
-      'react-refresh/only-export-components': [
-        'warn',
-        { allowConstantExport: true },
-      ],
-    },
-  },
-)
+);
