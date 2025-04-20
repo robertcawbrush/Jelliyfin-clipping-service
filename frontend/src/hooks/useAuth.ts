@@ -1,19 +1,18 @@
-import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { AppDispatch, RootState } from '../store';
 import { loginUser, logoutUser } from '../store/slices/authSlice';
 
 export const useAuth = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
   const auth = useSelector((state: RootState) => state.auth);
-
-  useEffect(() => {
-    // Auth state is now handled by the auth slice's loadState function
-  }, []);
 
   const login = async (username: string, password: string) => {
     try {
       await dispatch(loginUser({ username, password })).unwrap();
+      // Navigate to clips list after successful login
+      navigate('/clips');
     } catch (error) {
       console.error('Login failed:', error);
       throw error;
@@ -22,6 +21,7 @@ export const useAuth = () => {
 
   const logout = () => {
     dispatch(logoutUser());
+    navigate('/login');
   };
 
   return {
