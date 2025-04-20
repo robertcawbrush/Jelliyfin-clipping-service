@@ -3,7 +3,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { Provider } from 'react-redux';
 import { store } from './store';
 import { Login } from './components/Login';
-import { Home } from './pages/Home.container';
+import { Dashboard } from './pages/Dashboard';
+import { VideoList } from './pages/VideoList';
 import Header from './components/Header';
 import { useAuth } from './hooks/useAuth';
 
@@ -30,7 +31,15 @@ const AppContent: React.FC = () => {
             path="/"
             element={
               <ProtectedRoute>
-                <Home />
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/videos"
+            element={
+              <ProtectedRoute>
+                <VideoList />
               </ProtectedRoute>
             }
           />
@@ -38,7 +47,7 @@ const AppContent: React.FC = () => {
             path="/clips"
             element={
               <ProtectedRoute>
-                <Home />
+                <Dashboard />
               </ProtectedRoute>
             }
           />
@@ -46,7 +55,7 @@ const AppContent: React.FC = () => {
             path="/search"
             element={
               <ProtectedRoute>
-                <div>Video Search Page (Coming Soon)</div>
+                <Dashboard />
               </ProtectedRoute>
             }
           />

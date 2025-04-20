@@ -7,23 +7,34 @@ import { AppDispatch } from '../store';
 
 const Header: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { isAuthenticated, userId } = useSelector((state: RootState) => state.auth);
+  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
 
   const handleLogout = () => {
     dispatch(logoutUser());
   };
 
   return (
-    <header className="shadow-md" style={{ backgroundColor: 'var(--color-dark-surface)' }}>
+    <header
+      className="shadow-md"
+      style={{ backgroundColor: 'var(--color-dark-surface)' }}
+    >
       <nav className="container mx-auto px-4 py-4">
         <div className="flex justify-between items-center">
-          <Link to="/" className="text-2xl font-bold" style={{ color: 'var(--color-dark-text)' }}>
+          <Link
+            to="/"
+            className="text-2xl font-bold"
+            style={{ color: 'var(--color-dark-text)' }}
+          >
             Jellyfin Clipping Service
           </Link>
           <div className="flex items-center space-x-4">
             {isAuthenticated ? (
               <>
-                <Link to="/clips" className="hover:opacity-80" style={{ color: 'var(--color-dark-text)' }}>
+                <Link
+                  to="/clips"
+                  className="hover:opacity-80"
+                  style={{ color: 'var(--color-dark-text)' }}
+                >
                   Clips
                 </Link>
                 <button
@@ -36,7 +47,11 @@ const Header: React.FC = () => {
               </>
             ) : (
               <>
-                <Link to="/login" className="hover:opacity-80" style={{ color: 'var(--color-dark-text)' }}>
+                <Link
+                  to="/login"
+                  className="hover:opacity-80"
+                  style={{ color: 'var(--color-dark-text)' }}
+                >
                   Login
                 </Link>
               </>
@@ -48,4 +63,4 @@ const Header: React.FC = () => {
   );
 };
 
-export default Header; 
+export default Header;
