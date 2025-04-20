@@ -1,9 +1,18 @@
-import { configureStore } from "@reduxjs/toolkit";
-import allReducers from "../slices/AllReducers.ts";
+import { configureStore } from '@reduxjs/toolkit';
+import authReducer from './slices/authSlice';
+import videoReducer from './slices/videoSlice';
+import clipReducer from './slices/clipSlice';
 
 export const store = configureStore({
-     reducer: { ...allReducers },
-     devTools: process.env.NODE_ENV !== 'production'
+  reducer: {
+    auth: authReducer,
+    videos: videoReducer,
+    clips: clipReducer
+  },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: false
+    })
 });
 
 export type RootState = ReturnType<typeof store.getState>;

@@ -1,23 +1,34 @@
-import React, { useEffect } from 'react';
-import { useNavigate } from "react-router";
-import { useSelector } from "react-redux";
-import { RootState } from "../store";
+import React from 'react';
+import { useAppDispatch, useAppSelector } from '../hooks';
+import { fetchClips } from '../store/slices/clipsSlice';
 
-const HomeContainer: React.FC = () => {
-    const userState = useSelector((state: RootState) => state.user);
-    const navigate = useNavigate();
+export const Home: React.FC = () => {
+  const dispatch = useAppDispatch();
+  const { clips, loading, error } = useAppSelector((state) => state.clips);
 
-    useEffect(() => {
-        if (!userState?.isAuthenticated) {
-            navigate('/login');
-        }
-    }, [userState?.isAuthenticated, navigate]);
+  React.useEffect(() => {
+    dispatch(fetchClips());
+  }, [dispatch]);
 
-    return (
-        <>
-            <h1>Hello from Home</h1>
-        </>
-    )
-}
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
-export default HomeContainer;
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
+  return (
+    <div>
+      <h1>Clips</h1>
+      <div>
+        {clips.map((clip) => (
+          <div key={clip.id}>
+            <h2>{clip.title}</h2>
+            <p>{clip.description}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};

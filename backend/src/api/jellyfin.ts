@@ -65,6 +65,32 @@ export class JellyfinClient {
     return url.toString();
   }
 
+  async authenticate(username: string, password: string): Promise<{ accessToken: string; userId: string }> {
+    const url = this.buildUrl('/Users/AuthenticateByName');
+    
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-MediaBrowser-Token': this.apiKey
+      },
+      body: JSON.stringify({
+        Username: username,
+        Pw: password
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('Authentication failed');
+    }
+
+    const data = await response.json();
+    return {
+      accessToken: data.AccessToken,
+      userId: data.User.Id
+    };
+  }
+
   async getItems(params: JellyfinGetItemsParams): Promise<JellyfinItemsResponse> {
     const url = this.buildUrl('/Items', params);
     

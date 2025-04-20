@@ -1,29 +1,66 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router';
-import HomeContainer from './pages/Home.container.tsx';
-import LoginContainer from './pages/Login.container.tsx';
-import { useEffect } from 'react';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { store } from './store';
+import { Login } from './components/Login';
+import { Home } from './pages/Home.container';
+import { Header } from './components/Header';
+import { useAuth } from './hooks/useAuth';
 
-// TODO: add login auth
-// TODO: add thunks
-// TODO: add add clip list datagrid, with delete feature and view and warning about cron job
-// TODO: add new clip component
-// TODO: add
+// Protected Route component
+const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isAuthenticated } = useAuth();
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
 
-const App = () => {
-  // init
-  useEffect(() => {
-    // TODO: get server config, if config exists then login
-  });
+  return <>{children}</>;
+};
 
+const AppContent: React.FC = () => {
+  return (
+    <div className="min-h-screen bg-gray-100">
+      <Header />
+      
+      <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Home />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/clips"
+            element={
+              <ProtectedRoute>
+                <Home />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/search"
+            element={
+              <ProtectedRoute>
+                <div>Video Search Page (Coming Soon)</div>
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </main>
+    </div>
+  );
+};
+
+const App: React.FC = () => {
   return (
     <Provider store={store}>
       <Router>
-        <Routes>
-          <Route path="/" element={<HomeContainer />} />
-          <Route path="/login" element={<LoginContainer />} />
-        </Routes>
+        <AppContent />
       </Router>
     </Provider>
   );
