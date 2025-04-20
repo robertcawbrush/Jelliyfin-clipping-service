@@ -1,0 +1,28 @@
+
+
+video (stream part of video not entire video videos can be 6 hours long)
+GET
+queryParams={
+    streamUrl: string,
+    startTimeStamp: string (01:59:59)
+    endTimeStamp: string (01:59:59)
+}
+
+clip
+GET
+queryParams={
+    id: number
+}
+POST
+queryParams={
+    streamURL: string,
+    startTimeStamp: string (01:59:59)
+    endTimeStamp: string (01:59:59)
+}
+DELETE
+queryParams={
+    id: number
+}
+
+clips (get list)
+GET

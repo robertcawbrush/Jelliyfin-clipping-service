@@ -1,5 +1,13 @@
 {
   "imports": {
-    "@bearz/dotenv": "https://deno.land/x/dotenv@v3.2.0/mod.ts"
+    "drizzle-orm": "npm:drizzle-orm@0.29.3",
+    "drizzle-orm/sqlite-core": "npm:drizzle-orm@0.29.3/sqlite-core",
+    "sqlite": "https://deno.land/x/sqlite@v3.9.1/mod.ts",
+    "std/dotenv": "https://deno.land/std@0.219.0/dotenv/mod.ts"
+  },
+  "tasks": {
+    "dev": "deno run --allow-net --allow-env --allow-read --allow-write main.ts",
+    "generate": "deno run -A npm:drizzle-kit generate:sqlite",
+    "migrate": "deno run -A src/db/migrate.ts"
   }
 }

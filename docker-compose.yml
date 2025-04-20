@@ -7,7 +7,8 @@ services:
     working_dir: /app
     volumes:
       - ./backend:/app
-    command: run --allow-net --allow-read main.ts
+      - jcs-data:/app/data
+    command: run --allow-net --allow-read --allow-write --allow-env main.ts
     ports:
       - "8000:8000"
 
@@ -22,4 +23,8 @@ services:
     command: sh -c "npm install && npm run dev"
     ports:
       - "5173:5173"
+
+# Define named volumes
+volumes:
+  jcs-data:
 
