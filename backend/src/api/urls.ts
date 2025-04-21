@@ -4,7 +4,7 @@ import { Video } from "./models.ts";
 import { addVideo, getVideoByJellyfinId, createClip, getClipsByUserId, getClipById, deleteClip } from "../db/index.ts";
 import { JellyfinClient, initJellyfinClient } from "./jellyfin.ts";
 import { addCorsHeaders } from "../utils/cors.ts";
-import { handleVideoSearch, handleVideoById, handleVideoStream } from "../controllers/videoController.ts";
+import { handleVideoSearch, handleVideoById, handleVideoStream, handleVideoDetails } from "../controllers/videoController.ts";
 import { handleLogin } from "../controllers/authController.ts";
 import { handleGetClips, handleCreateClip, handleDeleteClip } from "../controllers/clipController.ts";
 
@@ -62,8 +62,8 @@ async function getVideoById(id: string): Promise<Video> {
     duration: video.RunTimeTicks ? Math.floor(video.RunTimeTicks / 10000000) : null,
     size: video.Size || null,
     container: video.Container || null,
-    videoCodec: video.MediaStreams?.find(s => s.Type === 'Video')?.Codec || null,
-    audioCodec: video.MediaStreams?.find(s => s.Type === 'Audio')?.Codec || null
+    videoCodec: video.MediaStreams?.find((s: { Type: string }) => s.Type === 'Video')?.Codec || null,
+    audioCodec: video.MediaStreams?.find((s: { Type: string }) => s.Type === 'Audio')?.Codec || null
   });
 
   console.log(`💾 Cached video metadata`);
@@ -138,6 +138,13 @@ export async function handleRequest(req: Request): Promise<Response> {
 
     if (url.pathname === '/api/video' && url.searchParams.has('id')) {
       return await handleVideoById(client, url.searchParams.get('id')!);
+    }
+
+    if (url.pathname.startsWith('/api/video-details/')) {
+      const videoId = url.pathname.split('/').pop();
+      if (videoId) {
+        return await handleVideoDetails(client, req, videoId);
+      }
     }
 
     if (url.pathname === '/api/stream' && url.searchParams.has('id')) {

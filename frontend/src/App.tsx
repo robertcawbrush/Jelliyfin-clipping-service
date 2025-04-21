@@ -5,6 +5,7 @@ import { store } from './store';
 import { Login } from './components/Login';
 import { Dashboard } from './pages/Dashboard';
 import { VideoList } from './pages/VideoList';
+import VideoDetails from './pages/VideoDetails';
 import Header from './components/Header';
 import { useAuth } from './hooks/useAuth';
 
@@ -40,6 +41,14 @@ const AppContent: React.FC = () => {
             element={
               <ProtectedRoute>
                 <VideoList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/videos/:id"
+            element={
+              <ProtectedRoute>
+                <VideoDetails />
               </ProtectedRoute>
             }
           />

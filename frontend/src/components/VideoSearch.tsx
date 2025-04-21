@@ -35,6 +35,10 @@ export const VideoSearch: React.FC<VideoSearchProps> = ({
     }
   };
 
+  const handleVideoClick = (videoId: string) => {
+    navigate(`/videos/${videoId}`);
+  };
+
   return (
     <div className="space-y-4">
       <h2 className="text-2xl font-bold" style={{ color: 'var(--color-dark-text)' }}>Search Videos</h2>
@@ -102,8 +106,9 @@ export const VideoSearch: React.FC<VideoSearchProps> = ({
             {searchResults.map((video) => (
               <div
                 key={video.Id}
-                className="p-4 rounded-lg"
+                className="p-4 rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
                 style={{ backgroundColor: 'var(--color-dark-surface)' }}
+                onClick={() => handleVideoClick(video.Id)}
               >
                 <h3 className="font-semibold" style={{ color: 'var(--color-dark-text)' }}>{video.Name}</h3>
                 <p className="text-sm" style={{ color: 'var(--color-dark-text-secondary)' }}>{video.Overview}</p>

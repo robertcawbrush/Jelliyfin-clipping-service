@@ -4,8 +4,10 @@ frontend/.env
 
 backend/.idea
 backend/node_modules
+backend/data/jellyfin.db
 frontend/.idea
 frontend/node_modules
+frontend/package-lock.json
 
 .idea/
 

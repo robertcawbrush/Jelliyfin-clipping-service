@@ -106,6 +106,51 @@ export async function handleVideoStream(client: JellyfinClient, req: Request, vi
   }
 }
 
+export async function handleVideoDetails(client: JellyfinClient, req: Request, videoId: string): Promise<Response> {
+  console.log(`📝 GET /api/video-details/${videoId}`);
+  
+  try {
+    const userId = req.headers.get('X-User-Id');
+    if (!userId) {
+      return new Response(JSON.stringify({ error: 'User ID is required' }), {
+        status: 401,
+        headers: addCorsHeaders(new Headers({
+          'Content-Type': 'application/json'
+        }))
+      });
+    }
+
+    // Call Jellyfin API to get video details
+    const response = await fetch(`${client['baseUrl']}/Users/${userId}/Items/${videoId}`, {
+      headers: {
+        'X-MediaBrowser-Token': client['apiKey']
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch video details: ${response.statusText}`);
+    }
+    
+    const videoData = await response.json();
+    console.log(`✅ Successfully fetched video details: ${videoData.Name}`);
+    
+    return new Response(JSON.stringify(videoData), {
+      status: 200,
+      headers: addCorsHeaders(new Headers({
+        'Content-Type': 'application/json'
+      }))
+    });
+  } catch (error: any) {
+    console.error(`❌ Error fetching video details: ${error.message}`);
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: addCorsHeaders(new Headers({
+        'Content-Type': 'application/json'
+      }))
+    });
+  }
+}
+
 // Helper function to get video metadata
 async function getVideoMetadata(client: JellyfinClient, id: string): Promise<Video> {
   console.log(`🔍 Fetching video: ${id}`);
