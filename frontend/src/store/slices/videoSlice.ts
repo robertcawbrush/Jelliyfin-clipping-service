@@ -25,7 +25,7 @@ export const searchVideos = createAsyncThunk(
   'videos/search',
   async ({ query, limit = 10 }: { query: string; limit?: number }) => {
     const response = await axios.get<JellyfinSearchResponse>(
-      `${API_BASE_URL}/api/videos/search`,
+      `${API_BASE_URL}/api/video-search`,
       {
         params: {
           q: query,
