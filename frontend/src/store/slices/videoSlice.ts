@@ -8,6 +8,8 @@ interface VideoState {
   loading: boolean;
   error: string | null;
   totalCount: number;
+  searchQuery: string;
+  searchLimit: number;
 }
 
 const initialState: VideoState = {
@@ -15,6 +17,8 @@ const initialState: VideoState = {
   loading: false,
   error: null,
   totalCount: 0,
+  searchQuery: '',
+  searchLimit: 10
 };
 
 export const searchVideos = createAsyncThunk(
@@ -42,6 +46,12 @@ const videoSlice = createSlice({
       state.error = null;
       state.totalCount = 0;
     },
+    setSearchQuery: (state, action) => {
+      state.searchQuery = action.payload;
+    },
+    setSearchLimit: (state, action) => {
+      state.searchLimit = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -61,5 +71,5 @@ const videoSlice = createSlice({
   },
 });
 
-export const { clearSearchResults } = videoSlice.actions;
+export const { clearSearchResults, setSearchQuery, setSearchLimit } = videoSlice.actions;
 export default videoSlice.reducer;
