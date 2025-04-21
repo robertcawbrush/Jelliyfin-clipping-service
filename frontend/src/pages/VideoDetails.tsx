@@ -75,13 +75,22 @@ const VideoDetails: React.FC = () => {
         <div className="p-6">
           <div className="flex justify-between items-center mb-4">
             <h1 className="text-3xl font-bold text-white">{video.Name}</h1>
-            <button
-              onClick={() => navigate('/videos')}
-              className="px-4 py-2 rounded-md text-white"
-              style={{ backgroundColor: 'var(--color-dark-primary)' }}
-            >
-              Back to Search
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => navigate(`/clip-studio/${video.Id}`)}
+                className="px-4 py-2 rounded-md text-white"
+                style={{ backgroundColor: 'var(--color-dark-primary)' }}
+              >
+                Create Clip
+              </button>
+              <button
+                onClick={() => navigate('/videos')}
+                className="px-4 py-2 rounded-md text-white"
+                style={{ backgroundColor: 'var(--color-dark-primary)' }}
+              >
+                Back to Search
+              </button>
+            </div>
           </div>
           
           {video.ImageTags?.Primary && (

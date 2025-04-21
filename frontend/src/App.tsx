@@ -6,6 +6,7 @@ import { Login } from './components/Login';
 import { Dashboard } from './pages/Dashboard';
 import { VideoList } from './pages/VideoList';
 import VideoDetails from './pages/VideoDetails';
+import ClipStudio from './pages/ClipStudio';
 import Header from './components/Header';
 import { useAuth } from './hooks/useAuth';
 
@@ -49,6 +50,14 @@ const AppContent: React.FC = () => {
             element={
               <ProtectedRoute>
                 <VideoDetails />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/clip-studio/:id"
+            element={
+              <ProtectedRoute>
+                <ClipStudio />
               </ProtectedRoute>
             }
           />
