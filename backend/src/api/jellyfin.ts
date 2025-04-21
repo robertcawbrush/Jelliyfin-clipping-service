@@ -38,73 +38,100 @@ export interface JellyfinItem {
 export interface JellyfinItemsResponse {
   Items: JellyfinItem[];
   TotalRecordCount: number;
+  StartIndex: number;
 }
+
+import { Jellyfin } from "@jellyfin/sdk";
 
 export class JellyfinClient {
   private baseUrl: string;
   private apiKey: string;
+  private sdkApi: any | null = null;
+  private jellyfin: any | null = null;
 
   constructor(baseUrl: string, apiKey: string) {
     this.baseUrl = baseUrl;
     this.apiKey = apiKey;
   }
 
-  private buildUrl(endpoint: string, params: Record<string, any> = {}): string {
-    const url = new URL(`${this.baseUrl}${endpoint}`);
+  // Get the Jellyfin SDK API instance
+  getSdkApi() {
+    console.log(`🔑 Getting SDK API instance...`);
     
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        if (Array.isArray(value)) {
-          url.searchParams.append(key, value.join(','));
-        } else {
-          url.searchParams.append(key, String(value));
-        }
+    if (!this.sdkApi) {
+      console.log(`🔑 Creating new SDK API instance...`);
+      
+      // Initialize Jellyfin SDK if not already initialized
+      if (!this.jellyfin) {
+        this.jellyfin = new Jellyfin({
+          clientInfo: {
+            name: 'JellyfinClippingService',
+            version: '1.0.0'
+          },
+          deviceInfo: {
+            name: 'BackendServer',
+            id: 'backend-server-1'
+          }
+        });
+        console.log(`🔑 Jellyfin SDK initialized with base URL: ${this.baseUrl}`);
       }
-    });
-
-    return url.toString();
+      
+      // Create an API instance with the server address
+      this.sdkApi = this.jellyfin.createApi(this.baseUrl);
+      
+      console.log(`🔑 API instance created, setting API key in headers...`);
+      
+      // Set the API key in the headers
+      this.sdkApi.configuration.headers = {
+        ...this.sdkApi.configuration.headers,
+        'X-MediaBrowser-Token': this.apiKey
+      };
+      
+      console.log(`🔑 API key set in headers:`, this.sdkApi.configuration.headers);
+    } else {
+      console.log(`🔑 Using existing SDK API instance`);
+    }
+    
+    return this.sdkApi;
   }
 
   async authenticate(username: string, password: string): Promise<{ accessToken: string; userId: string }> {
-    const url = this.buildUrl('/Users/AuthenticateByName');
-    
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-MediaBrowser-Token': this.apiKey
-      },
-      body: JSON.stringify({
-        Username: username,
-        Pw: password
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error('Authentication failed');
+    try {
+      console.log(`🔑 Authenticating user: ${username}`);
+      const api = this.getSdkApi();
+      const authResult = await api.authenticateUserByName(username, password);
+      
+      if (!authResult.data.User) {
+        throw new Error('User data not found in authentication response');
+      }
+      
+      console.log(`✅ Authentication successful for user: ${username}`);
+      return {
+        accessToken: authResult.data.AccessToken,
+        userId: authResult.data.User.Id
+      };
+    } catch (error: any) {
+      console.error(`❌ Authentication failed: ${error.message}`);
+      throw error;
     }
-
-    const data = await response.json();
-    return {
-      accessToken: data.AccessToken,
-      userId: data.User.Id
-    };
   }
 
   async getItems(params: JellyfinGetItemsParams): Promise<JellyfinItemsResponse> {
-    const url = this.buildUrl('/Items', params);
-    
-    const response = await fetch(url, {
-      headers: {
-        'X-MediaBrowser-Token': this.apiKey
+    try {
+      console.log(`🔍 Getting items with params:`, params);
+      const api = this.getSdkApi();
+      const response = await api.items.getItems(params);
+      
+      if (!response.data.Items) {
+        throw new Error('No items found in the response');
       }
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch items: ${response.statusText}`);
+      
+      console.log(`✅ Found ${response.data.Items.length} items`);
+      return response.data;
+    } catch (error: any) {
+      console.error(`❌ Failed to get items: ${error.message}`);
+      throw error;
     }
-
-    return await response.json();
   }
 
   async searchVideos(searchTerm?: string, limit = 20): Promise<JellyfinItemsResponse> {

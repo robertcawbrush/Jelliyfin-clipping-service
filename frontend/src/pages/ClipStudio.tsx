@@ -102,7 +102,7 @@ const ClipStudio: React.FC = () => {
       // Construct the stream URL with required parameters
       const params = new URLSearchParams({
         DeviceId: 'TW96aWxsYS81LjAgKFdpbmRvd3MgTlQgMTAuMDsgV2luNjQ7IHg2NCkgQXBwbGVXZWJLaXQvNTM3LjM2IChLSFRNTCwgbGlrZSBHZWNrbykgQ2hyb21lLzEzMC4wLjAuMCBTYWZhcmkvNTM3LjM2fDE3MzA5NTY4OTU3NTA1',
-        MediaSourceId: video.MediaSources[0].Id,
+        MediaSourceId: video.Id,
         VideoCodec: 'h264',
         AudioCodec: 'copy',
         AudioStreamIndex: '1',

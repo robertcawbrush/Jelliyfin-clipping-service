@@ -16,10 +16,22 @@ export async function handleLogin(client: JellyfinClient, req: Request): Promise
       });
     }
 
-    const authResult = await client.authenticate(username, password);
+    // Use the shared API instance from the client
+    const api = client.getSdkApi();
+    
+    // Authenticate using the SDK
+    const authResult = await api.authenticateUserByName(username, password);
+
+    
+    if (!authResult.data.User) {
+      throw new Error('User data not found in authentication response');
+    }
     
     console.log(`✅ User authenticated successfully`);
-    return new Response(JSON.stringify(authResult), {
+    return new Response(JSON.stringify({
+      accessToken: authResult.data.AccessToken,
+      userId: authResult.data.User.Id
+    }), {
       status: 200,
       headers: addCorsHeaders(new Headers({
         'Content-Type': 'application/json'
