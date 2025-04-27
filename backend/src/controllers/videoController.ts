@@ -9,7 +9,7 @@ export async function handleVideoSearch(client: JellyfinClient, req: Request): P
   
   try {
     const url = new URL(req.url);
-    const searchTerm = url.searchParams.get('q');
+    const searchTerm = url.searchParams.get('query');
     const limit = parseInt(url.searchParams.get('limit') || '20');
     
     console.log(`🔍 Search parameters: term="${searchTerm}", limit=${limit}`);
