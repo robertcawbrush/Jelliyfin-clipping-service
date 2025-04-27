@@ -47,14 +47,16 @@ const VideoDetails: React.FC = () => {
           <h1 className="text-2xl font-bold mb-2" style={{ color: 'var(--color-dark-text)' }}>{video.Name}</h1>
           
           <div className="flex justify-between items-center mb-4">
-            {video.Type === 'Episode' && video.SeriesName && (
-              <p className="text-lg" style={{ color: 'var(--color-dark-text-secondary)' }}>
-                Series: {video.SeriesName}
-              </p>
-            )}
+            <div className="flex-1">
+              {video.Type === 'Episode' && video.SeriesName && (
+                <p className="text-lg" style={{ color: 'var(--color-dark-text-secondary)' }}>
+                  Series: {video.SeriesName}
+                </p>
+              )}
+            </div>
             <button
               onClick={() => navigate(`/clip-studio/${video.Id}`)}
-              className="px-4 py-2 rounded-md text-white transition-colors"
+              className="px-4 py-2 rounded-md text-white transition-colors ml-auto"
               style={{ backgroundColor: 'var(--color-dark-primary)' }}
             >
               Create Clip
