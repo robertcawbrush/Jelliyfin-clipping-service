@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAppDispatch, useAppSelector } from '../hooks';
-import { searchVideos, clearSearchResults, setSearchQuery, setSearchLimit } from '../store/slices/videoSlice';
+import { searchVideos, setSearchQuery, setSearchLimit, clearSearchResults } from '../store/slices/videoSlice';
 import { useNavigate } from 'react-router-dom';
 
 interface VideoSearchProps {

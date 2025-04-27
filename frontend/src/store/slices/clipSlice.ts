@@ -1,15 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-
-interface Clip {
-  id: number;
-  videoId: string;
-  startTime: string;
-  endTime: string;
-  createdAt: string;
-  updatedAt: string;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
-  filePath?: string;
-}
+import axiosInstance from '../../api/axios';
+import { Clip } from '../../types';
 
 interface ClipState {
   clips: Clip[];
@@ -30,22 +21,10 @@ export const createClip = createAsyncThunk(
   'clips/create',
   async ({ videoId, startTime, endTime }: { videoId: string; startTime: string; endTime: string }, { rejectWithValue }) => {
     try {
-      const response = await fetch('http://localhost:8000/api/clips', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ videoId, startTime, endTime }),
-      });
-
-      if (!response.ok) {
-        return rejectWithValue('Failed to create clip');
-      }
-
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      return rejectWithValue('Network error');
+      const response = await axiosInstance.post('/api/clips', { videoId, startTime, endTime });
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.error || 'Failed to create clip');
     }
   }
 );
@@ -55,21 +34,10 @@ export const fetchClips = createAsyncThunk(
   'clips/fetchAll',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await fetch('http://localhost:8000/api/clips', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        return rejectWithValue('Failed to fetch clips');
-      }
-
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      return rejectWithValue('Network error');
+      const response = await axiosInstance.get('/api/clips');
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.error || 'Failed to fetch clips');
     }
   }
 );
@@ -79,21 +47,10 @@ export const fetchClipById = createAsyncThunk(
   'clips/fetchById',
   async (clipId: number, { rejectWithValue }) => {
     try {
-      const response = await fetch(`http://localhost:8000/api/clips/${clipId}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        return rejectWithValue('Failed to fetch clip');
-      }
-
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      return rejectWithValue('Network error');
+      const response = await axiosInstance.get(`/api/clips/${clipId}`);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.error || 'Failed to fetch clip');
     }
   }
 );
@@ -103,20 +60,10 @@ export const deleteClip = createAsyncThunk(
   'clips/delete',
   async (clipId: number, { rejectWithValue }) => {
     try {
-      const response = await fetch(`http://localhost:8000/api/clips/${clipId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        return rejectWithValue('Failed to delete clip');
-      }
-
+      await axiosInstance.delete(`/api/clips/${clipId}`);
       return clipId;
-    } catch (error) {
-      return rejectWithValue('Network error');
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.error || 'Failed to delete clip');
     }
   }
 );
@@ -125,6 +72,9 @@ const clipSlice = createSlice({
   name: 'clips',
   initialState,
   reducers: {
+    setCurrentClip: (state, action) => {
+      state.currentClip = action.payload;
+    },
     clearCurrentClip: (state) => {
       state.currentClip = null;
     }
@@ -139,7 +89,6 @@ const clipSlice = createSlice({
       .addCase(createClip.fulfilled, (state, action) => {
         state.loading = false;
         state.clips.push(action.payload);
-        state.currentClip = action.payload;
       })
       .addCase(createClip.rejected, (state, action) => {
         state.loading = false;
@@ -190,5 +139,5 @@ const clipSlice = createSlice({
   }
 });
 
-export const { clearCurrentClip } = clipSlice.actions;
+export const { setCurrentClip, clearCurrentClip } = clipSlice.actions;
 export default clipSlice.reducer; 

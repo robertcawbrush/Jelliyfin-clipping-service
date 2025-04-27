@@ -1,198 +1,88 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { API_BASE_URL } from '../config';
+import { useAppDispatch, useAppSelector } from '../hooks';
+import { fetchVideoDetails } from '../store/slices/videoSlice';
 import { Video } from '../types';
-import { useAppSelector } from '../hooks';
 
 const VideoDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { userId, accessToken } = useAppSelector((state) => state.auth);
-  const [video, setVideo] = useState<Video | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const dispatch = useAppDispatch();
+  const { searchResults, loading, error } = useAppSelector((state) => state.videos);
+  const video = searchResults.find(v => v.Id === id);
 
   useEffect(() => {
-    const fetchVideoDetails = async () => {
-      try {
-        // Use our own API endpoint that calls Jellyfin
-        const response = await axios.get<Video>(
-          `${API_BASE_URL}/api/video-details/${id}`,
-          {
-            headers: {
-              'X-User-Id': userId || '',
-              'Authorization': `Bearer ${accessToken || ''}`
-            }
-          }
-        );
-        setVideo(response.data);
-      } catch (err) {
-        console.error('Error fetching video details:', err);
-        setError('Failed to load video details');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (id && userId) {
-      fetchVideoDetails();
-    } else if (!userId) {
-      setError('User ID not found. Please log in again.');
-      setLoading(false);
+    if (id) {
+      dispatch(fetchVideoDetails(id));
     }
-  }, [id, userId, accessToken]);
+  }, [dispatch, id]);
 
   if (loading) {
-    return <div className="text-center py-8">Loading...</div>;
+    return <div className="text-center py-8" style={{ color: 'var(--color-dark-text)' }}>Loading...</div>;
   }
 
-  if (error || !video) {
-    return (
-      <div className="text-center py-8">
-        <div className="text-red-500 mb-4">{error || 'Video not found'}</div>
-        <button
-          onClick={() => navigate('/videos')}
-          className="px-4 py-2 rounded-md text-white"
-          style={{ backgroundColor: 'var(--color-dark-primary)' }}
-        >
-          Back to Search
-        </button>
-      </div>
-    );
+  if (error) {
+    return <div className="text-center py-8 text-red-500">{error}</div>;
   }
 
-  const formatDuration = (ticks: number) => {
-    const hours = Math.floor(ticks / 36000000000);
-    const minutes = Math.floor((ticks % 36000000000) / 600000000);
-    const seconds = Math.floor((ticks % 600000000) / 10000000);
-    return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-  };
+  if (!video) {
+    return <div className="text-center py-8" style={{ color: 'var(--color-dark-text)' }}>Video not found</div>;
+  }
 
   return (
-    <div className="max-w-4xl mx-auto py-8">
-      <div className="bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+    <div className="container mx-auto px-4 py-8">
+      <div className="rounded-lg shadow-lg overflow-hidden" style={{ backgroundColor: 'var(--color-dark-surface)' }}>
         <div className="p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h1 className="text-3xl font-bold text-white">{video.Name}</h1>
-            <div className="flex gap-2">
-              <button
-                onClick={() => navigate(`/clip-studio/${video.Id}`)}
-                className="px-4 py-2 rounded-md text-white"
-                style={{ backgroundColor: 'var(--color-dark-primary)' }}
-              >
-                Create Clip
-              </button>
-              <button
-                onClick={() => navigate('/videos')}
-                className="px-4 py-2 rounded-md text-white"
-                style={{ backgroundColor: 'var(--color-dark-primary)' }}
-              >
-                Back to Search
-              </button>
-            </div>
+          <div className="flex items-center gap-2 mb-4">
+            <span className="px-2 py-1 text-xs rounded-full" style={{ backgroundColor: 'var(--color-dark-primary)', color: 'white' }}>
+              {video.Type}
+            </span>
+            {video.ProductionYear && (
+              <span className="text-sm" style={{ color: 'var(--color-dark-text-secondary)' }}>
+                {video.ProductionYear}
+              </span>
+            )}
           </div>
           
-          {video.ImageTags?.Primary && (
-            <img
-              src={`${API_BASE_URL}/Items/${video.Id}/Images/Primary`}
-              alt={video.Name}
-              className="w-full h-64 object-cover rounded-lg mb-6"
-            />
-          )}
-
+          <h1 className="text-2xl font-bold mb-2" style={{ color: 'var(--color-dark-text)' }}>{video.Name}</h1>
+          
+          <div className="flex justify-between items-center mb-4">
+            {video.Type === 'Episode' && video.SeriesName && (
+              <p className="text-lg" style={{ color: 'var(--color-dark-text-secondary)' }}>
+                Series: {video.SeriesName}
+              </p>
+            )}
+            <button
+              onClick={() => navigate(`/clip-studio/${video.Id}`)}
+              className="px-4 py-2 rounded-md text-white transition-colors"
+              style={{ backgroundColor: 'var(--color-dark-primary)' }}
+            >
+              Create Clip
+            </button>
+          </div>
+          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-300">Overview</h3>
-                <p className="text-gray-400">{video.Overview || 'No overview available'}</p>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-semibold text-gray-300">Details</h3>
-                <dl className="grid grid-cols-2 gap-2 text-gray-400">
-                  <dt>Duration:</dt>
-                  <dd>{formatDuration(video.RunTimeTicks)}</dd>
-                  
-                  <dt>Year:</dt>
-                  <dd>{video.ProductionYear || 'N/A'}</dd>
-                  
-                  <dt>Rating:</dt>
-                  <dd>{video.OfficialRating || 'N/A'}</dd>
-                  
-                  <dt>Container:</dt>
-                  <dd>{video.Container || 'N/A'}</dd>
-                  
-                  {video.Type === 'Episode' && video.SeriesName && (
-                    <>
-                      <dt>Series:</dt>
-                      <dd>{video.SeriesName}</dd>
-                    </>
-                  )}
-                </dl>
-              </div>
+            <div>
+              <img
+                src={video.ImageTags?.Primary ? `/api/items/${video.Id}/images/Primary` : '/placeholder.jpg'}
+                alt={video.Name}
+                className="w-full rounded-lg"
+              />
             </div>
-
             <div className="space-y-4">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-300">Media Information</h3>
-                <dl className="grid grid-cols-2 gap-2 text-gray-400">
-                  {video.MediaStreams?.map((stream, index) => (
-                    <React.Fragment key={index}>
-                      <dt className="col-span-2 font-semibold text-gray-300 mt-2">
-                        {stream.Type} Stream {index + 1}
-                      </dt>
-                      <dt>Codec:</dt>
-                      <dd>{stream.Codec}</dd>
-                      {stream.Width && stream.Height && (
-                        <>
-                          <dt>Resolution:</dt>
-                          <dd>{`${stream.Width}x${stream.Height}`}</dd>
-                        </>
-                      )}
-                      {stream.BitRate && (
-                        <>
-                          <dt>Bitrate:</dt>
-                          <dd>{`${Math.round(stream.BitRate / 1000)} kbps`}</dd>
-                        </>
-                      )}
-                      {stream.AspectRatio && (
-                        <>
-                          <dt>Aspect Ratio:</dt>
-                          <dd>{stream.AspectRatio}</dd>
-                        </>
-                      )}
-                      {stream.AverageFrameRate && (
-                        <>
-                          <dt>Frame Rate:</dt>
-                          <dd>{stream.AverageFrameRate.toFixed(2)} fps</dd>
-                        </>
-                      )}
-                    </React.Fragment>
-                  ))}
-                </dl>
-              </div>
+              <p className="text-base" style={{ color: 'var(--color-dark-text-secondary)' }}>{video.Overview}</p>
               
-              {video.MediaSources && video.MediaSources.length > 0 && (
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-300">Media Sources</h3>
-                  <dl className="grid grid-cols-2 gap-2 text-gray-400">
-                    {video.MediaSources.map((source, index) => (
-                      <React.Fragment key={index}>
-                        <dt className="col-span-2 font-semibold text-gray-300 mt-2">
-                          Source {index + 1}
-                        </dt>
-                        <dt>Container:</dt>
-                        <dd>{source.Container || 'N/A'}</dd>
-                        <dt>Size:</dt>
-                        <dd>{source.Size ? `${Math.round(source.Size / (1024 * 1024))} MB` : 'N/A'}</dd>
-                        <dt>Bitrate:</dt>
-                        <dd>{source.Bitrate ? `${Math.round(source.Bitrate / 1000)} kbps` : 'N/A'}</dd>
-                      </React.Fragment>
-                    ))}
-                  </dl>
-                </div>
-              )}
+              <div className="space-y-2">
+                <p><span className="font-semibold" style={{ color: 'var(--color-dark-text)' }}>Type:</span> <span style={{ color: 'var(--color-dark-text-secondary)' }}>{video.Type}</span></p>
+                <p><span className="font-semibold" style={{ color: 'var(--color-dark-text)' }}>Year:</span> <span style={{ color: 'var(--color-dark-text-secondary)' }}>{video.ProductionYear}</span></p>
+                <p><span className="font-semibold" style={{ color: 'var(--color-dark-text)' }}>Duration:</span> <span style={{ color: 'var(--color-dark-text-secondary)' }}>{Math.floor(video.RunTimeTicks / 10000000 / 60)} minutes</span></p>
+                {video.OfficialRating && (
+                  <p><span className="font-semibold" style={{ color: 'var(--color-dark-text)' }}>Rating:</span> <span style={{ color: 'var(--color-dark-text-secondary)' }}>{video.OfficialRating}</span></p>
+                )}
+                {video.CommunityRating && (
+                  <p><span className="font-semibold" style={{ color: 'var(--color-dark-text)' }}>Community Rating:</span> <span style={{ color: 'var(--color-dark-text-secondary)' }}>{video.CommunityRating.toFixed(1)}/5</span></p>
+                )}
+              </div>
             </div>
           </div>
         </div>
