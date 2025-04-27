@@ -120,9 +120,9 @@ const ClipStudio: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+      <div className="rounded-lg shadow-lg overflow-hidden" style={{ backgroundColor: 'var(--color-dark-surface)' }}>
         <div className="p-6">
-          <h1 className="text-2xl font-bold mb-4">{video.Name}</h1>
+          <h1 className="text-2xl font-bold mb-4" style={{ color: 'var(--color-dark-text)' }}>{video.Name}</h1>
           
           <div className="mb-6">
             <video
@@ -135,26 +135,36 @@ const ClipStudio: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-dark-text)' }}>
                 Start Time
               </label>
               <input
                 type="text"
                 value={startTime}
                 onChange={(e) => setStartTime(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                className="w-full px-3 py-2 border rounded-md"
+                style={{ 
+                  backgroundColor: 'var(--color-dark-surface)',
+                  borderColor: 'var(--color-dark-border)',
+                  color: 'var(--color-dark-text)'
+                }}
                 placeholder="HH:MM:SS"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-dark-text)' }}>
                 End Time
               </label>
               <input
                 type="text"
                 value={endTime}
                 onChange={(e) => setEndTime(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                className="w-full px-3 py-2 border rounded-md"
+                style={{ 
+                  backgroundColor: 'var(--color-dark-surface)',
+                  borderColor: 'var(--color-dark-border)',
+                  color: 'var(--color-dark-text)'
+                }}
                 placeholder="HH:MM:SS"
               />
             </div>
@@ -164,7 +174,8 @@ const ClipStudio: React.FC = () => {
             <button
               onClick={handleCreateClip}
               disabled={isCreating}
-              className="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors disabled:opacity-50"
+              className="w-full px-4 py-2 text-white rounded transition-colors disabled:opacity-50"
+              style={{ backgroundColor: 'var(--color-dark-primary)' }}
             >
               {isCreating ? 'Creating...' : 'Create Clip'}
             </button>
