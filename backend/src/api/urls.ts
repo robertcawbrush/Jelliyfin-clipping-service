@@ -148,15 +148,23 @@ export async function handleRequest(req: Request): Promise<Response> {
     }
 
     // Handle both path and query parameter formats for video streaming
-    if (url.pathname.startsWith('/api/stream/')) {
+    if (url.pathname.startsWith('/api/hls-playlist/')) {
+      const pathParts = url.pathname.split('/');
+      const videoId = pathParts[3]; // Get the video ID from the path
+      const playlistType = pathParts[4]; // Get the playlist type (master or quality-specific)
+      if (videoId) {
+        return await handleVideoStream(client, req, videoId);
+      }
+    } else if (url.pathname.startsWith('/api/hls-segment/')) {
+      const pathParts = url.pathname.split('/');
+      const playlistId = pathParts[3]; // Get the playlist ID from the path
+      if (playlistId) {
+        return await handleVideoStream(client, req, playlistId);
+      }
+    } else if (url.pathname.startsWith('/api/stream/')) {
       const pathParts = url.pathname.split('/');
       const videoId = pathParts[3]; // Get the video ID from the path
       if (videoId) {
-        // Check if this is an HLS request (contains .m3u8 or .ts in the path)
-        if (pathParts.some(part => part.endsWith('.m3u8') || part.endsWith('.ts'))) {
-          return await handleVideoStream(client, req, videoId);
-        }
-        // Otherwise handle as a direct stream request
         return await streamVideo(req, videoId);
       }
     } else if (url.pathname === '/api/stream' && url.searchParams.has('id')) {

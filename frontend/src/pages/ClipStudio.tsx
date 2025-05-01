@@ -44,7 +44,7 @@ const ClipStudio: React.FC = () => {
       const hls = new Hls();
       hlsRef.current = hls;
 
-      hls.loadSource(`${API_BASE_URL}/api/stream/${video.Id}/master.m3u8`);
+      hls.loadSource(`${API_BASE_URL}/api/hls-playlist/${video.Id}/master`);
       hls.attachMedia(videoRef.current);
 
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
