@@ -2,14 +2,16 @@
 export interface JellyfinGetItemsParams {
   // Most commonly used parameters
   searchTerm?: string;
-  includeItemTypes?: Array<'Movie' | 'Series' | 'Episode' | 'Video'>;
-  sortBy?: Array<'Name' | 'DateCreated' | 'PremiereDate' | 'PlayCount' | 'Random'>;
-  sortOrder?: Array<'Ascending' | 'Descending'>;
+  includeItemTypes?: Array<"Movie" | "Series" | "Episode" | "Video">;
+  sortBy?: Array<
+    "Name" | "DateCreated" | "PremiereDate" | "PlayCount" | "Random"
+  >;
+  sortOrder?: Array<"Ascending" | "Descending">;
   limit?: number;
   startIndex?: number;
   recursive?: boolean;
   parentId?: string;
-  fields?: Array<'Overview' | 'Path' | 'MediaSources' | 'MediaStreams'>;
+  fields?: Array<"Overview" | "Path" | "MediaSources" | "MediaStreams">;
   enableImages?: boolean;
   enableUserData?: boolean;
   imageTypeLimit?: number;
@@ -18,7 +20,7 @@ export interface JellyfinGetItemsParams {
 
 export interface JellyfinMediaStream {
   Codec: string;
-  Type: 'Video' | 'Audio' | 'Subtitle';
+  Type: "Video" | "Audio" | "Subtitle";
   // Add more properties as needed
 }
 
@@ -57,58 +59,66 @@ export class JellyfinClient {
   // Get the Jellyfin SDK API instance
   getSdkApi() {
     console.log(`🔑 Getting SDK API instance...`);
-    
+
     if (!this.sdkApi) {
       console.log(`🔑 Creating new SDK API instance...`);
-      
+
       // Initialize Jellyfin SDK if not already initialized
       if (!this.jellyfin) {
         this.jellyfin = new Jellyfin({
           clientInfo: {
-            name: 'JellyfinClippingService',
-            version: '1.0.0'
+            name: "JellyfinClippingService",
+            version: "1.0.0",
           },
           deviceInfo: {
-            name: 'BackendServer',
-            id: 'backend-server-1'
-          }
+            name: "JellyClippingService",
+            id: "jelly-clipping-service",
+          },
         });
-        console.log(`🔑 Jellyfin SDK initialized with base URL: ${this.baseUrl}`);
+        console.log(
+          `🔑 Jellyfin SDK initialized with base URL: ${this.baseUrl}`,
+        );
       }
-      
+
       // Create an API instance with the server address
       this.sdkApi = this.jellyfin.createApi(this.baseUrl);
-      
+
       console.log(`🔑 API instance created, setting API key in headers...`);
-      
+
       // Set the API key in the headers
       this.sdkApi.configuration.headers = {
         ...this.sdkApi.configuration.headers,
-        'X-MediaBrowser-Token': this.apiKey
+        "X-MediaBrowser-Token": this.apiKey,
       };
-      
-      console.log(`🔑 API key set in headers:`, this.sdkApi.configuration.headers);
+
+      console.log(
+        `🔑 API key set in headers:`,
+        this.sdkApi.configuration.headers,
+      );
     } else {
       console.log(`🔑 Using existing SDK API instance`);
     }
-    
+
     return this.sdkApi;
   }
 
-  async authenticate(username: string, password: string): Promise<{ accessToken: string; userId: string }> {
+  async authenticate(
+    username: string,
+    password: string,
+  ): Promise<{ accessToken: string; userId: string }> {
     try {
       console.log(`🔑 Authenticating user: ${username}`);
       const api = this.getSdkApi();
       const authResult = await api.authenticateUserByName(username, password);
-      
+
       if (!authResult.data.User) {
-        throw new Error('User data not found in authentication response');
+        throw new Error("User data not found in authentication response");
       }
-      
+
       console.log(`✅ Authentication successful for user: ${username}`);
       return {
         accessToken: authResult.data.AccessToken,
-        userId: authResult.data.User.Id
+        userId: authResult.data.User.Id,
       };
     } catch (error: any) {
       console.error(`❌ Authentication failed: ${error.message}`);
@@ -116,16 +126,18 @@ export class JellyfinClient {
     }
   }
 
-  async getItems(params: JellyfinGetItemsParams): Promise<JellyfinItemsResponse> {
+  async getItems(
+    params: JellyfinGetItemsParams,
+  ): Promise<JellyfinItemsResponse> {
     try {
       console.log(`🔍 Getting items with params:`, params);
       const api = this.getSdkApi();
       const response = await api.items.getItems(params);
-      
+
       if (!response.data.Items) {
-        throw new Error('No items found in the response');
+        throw new Error("No items found in the response");
       }
-      
+
       console.log(`✅ Found ${response.data.Items.length} items`);
       return response.data;
     } catch (error: any) {
@@ -134,36 +146,39 @@ export class JellyfinClient {
     }
   }
 
-  async searchVideos(searchTerm?: string, limit = 20): Promise<JellyfinItemsResponse> {
+  async searchVideos(
+    searchTerm?: string,
+    limit = 20,
+  ): Promise<JellyfinItemsResponse> {
     return this.getItems({
       searchTerm,
-      includeItemTypes: ['Movie', 'Episode', 'Video'],
+      includeItemTypes: ["Movie", "Episode", "Video"],
       recursive: true,
       limit,
-      fields: ['Path', 'Overview', 'MediaSources', 'MediaStreams'],
+      fields: ["Path", "Overview", "MediaSources", "MediaStreams"],
       enableImages: true,
       imageTypeLimit: 1,
-      sortBy: ['Name'],
-      sortOrder: ['Ascending']
+      sortBy: ["Name"],
+      sortOrder: ["Ascending"],
     });
   }
 
   async getRecentVideos(limit = 20): Promise<JellyfinItemsResponse> {
     return this.getItems({
-      includeItemTypes: ['Movie', 'Episode', 'Video'],
+      includeItemTypes: ["Movie", "Episode", "Video"],
       recursive: true,
       limit,
-      fields: ['Path', 'Overview', 'MediaSources', 'MediaStreams'],
+      fields: ["Path", "Overview", "MediaSources", "MediaStreams"],
       enableImages: true,
       imageTypeLimit: 1,
-      sortBy: ['DateCreated'],
-      sortOrder: ['Descending']
+      sortBy: ["DateCreated"],
+      sortOrder: ["Descending"],
     });
   }
 }
 
 export async function initJellyfinClient(): Promise<JellyfinClient> {
-  const JELLYFIN_URL = Deno.env.get("JELLYFIN_URL")?.replace(/\/$/, '');
+  const JELLYFIN_URL = Deno.env.get("JELLYFIN_URL")?.replace(/\/$/, "");
   const JELLYFIN_API_KEY = Deno.env.get("JELLYFIN_API_KEY");
 
   if (!JELLYFIN_URL || !JELLYFIN_API_KEY) {
@@ -171,4 +186,4 @@ export async function initJellyfinClient(): Promise<JellyfinClient> {
   }
 
   return new JellyfinClient(JELLYFIN_URL, JELLYFIN_API_KEY);
-} 
+}
