@@ -42,7 +42,6 @@ export async function handleVideoSearch(client: JellyfinClient, req: Request): P
     // Use the SDK to get video details
     const response = await getItemsApi(api).getItems(searchParams)
 
-    console.log(`🔍 Search response received:`, response);
     
     // Check if Items exists in the response
     if (!response.data.Items) {
