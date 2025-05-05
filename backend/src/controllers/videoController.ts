@@ -35,9 +35,6 @@ export async function handleVideoSearch(client: JellyfinClient, req: Request): P
     
     // Use the SDK to search for videos
     console.log(`🔍 Sending search request to Jellyfin...`);
-    // const response = await api.items.getItems(searchParams);
-
-    // const response = getItemsApi(api);
     
     // Use the SDK to get video details
     const response = await getItemsApi(api).getItems(searchParams)
