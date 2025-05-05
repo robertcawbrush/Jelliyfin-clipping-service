@@ -175,6 +175,51 @@ export class JellyfinClient {
       sortOrder: ["Descending"],
     });
   }
+
+  async getHlsStream(
+    itemId: string,
+    mediaSourceId: string,
+    params: {
+      container?: string;
+      static?: boolean;
+      videoCodec?: string;
+      audioCodec?: string;
+      audioBitRate?: number;
+      videoBitRate?: number;
+      width?: number;
+      height?: number;
+      maxWidth?: number;
+      maxHeight?: number;
+      enableAdaptiveBitrateStreaming?: boolean;
+    } = {}
+  ): Promise<{ masterPlaylistUrl: string }> {
+    try {
+      console.log(`🎬 Getting HLS stream for item: ${itemId}`);
+      const api = this.getSdkApi();
+
+      // Get the master playlist URL
+      const masterPlaylistUrl = `${this.baseUrl}/Videos/${itemId}/master.m3u8?` + new URLSearchParams({
+        MediaSourceId: mediaSourceId,
+        Container: params.container || 'ts',
+        Static: params.static?.toString() || 'false',
+        VideoCodec: params.videoCodec || '',
+        AudioCodec: params.audioCodec || '',
+        AudioBitRate: params.audioBitRate?.toString() || '',
+        VideoBitRate: params.videoBitRate?.toString() || '',
+        Width: params.width?.toString() || '',
+        Height: params.height?.toString() || '',
+        MaxWidth: params.maxWidth?.toString() || '',
+        MaxHeight: params.maxHeight?.toString() || '',
+        EnableAdaptiveBitrateStreaming: params.enableAdaptiveBitrateStreaming?.toString() || 'true'
+      }).toString();
+
+      console.log(`✅ HLS stream URL generated: ${masterPlaylistUrl}`);
+      return { masterPlaylistUrl };
+    } catch (error: any) {
+      console.error(`❌ Failed to get HLS stream: ${error.message}`);
+      throw error;
+    }
+  }
 }
 
 export async function initJellyfinClient(): Promise<JellyfinClient> {

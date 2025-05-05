@@ -7,6 +7,7 @@ import { addCorsHeaders } from "../utils/cors.ts";
 import { handleVideoSearch, handleVideoById, handleVideoStream, handleVideoDetails } from "../controllers/videoController.ts";
 import { handleLogin } from "../controllers/authController.ts";
 import { handleGetClips, handleCreateClip, handleDeleteClip } from "../controllers/clipController.ts";
+import { handleHlsPlaylist, handleHlsSegment } from "../controllers/hlsController.ts";
 
 let jellyfin: Awaited<ReturnType<typeof initJellyfinClient>>;
 
@@ -131,6 +132,22 @@ export async function handleRequest(req: Request): Promise<Response> {
   try {
     const client = await getJellyfinClient();
 
+    // HLS routes
+    if (url.pathname.startsWith('/api/hls-playlist/')) {
+      const pathParts = url.pathname.split('/');
+      const videoId = pathParts[3]; // Get the video ID from the path
+      if (videoId && videoId !== 'master') { // Skip if the last part is 'master'
+        return await handleHlsPlaylist(client, req, videoId);
+      }
+    }
+
+    if (url.pathname.startsWith('/api/hls-segment/')) {
+      const segmentPath = url.pathname.split('/api/hls-segment/')[1];
+      if (segmentPath) {
+        return await handleHlsSegment(client, req, segmentPath);
+      }
+    }
+
     // Video routes
     if (url.pathname === '/api/video-search') {
       return await handleVideoSearch(client, req);
@@ -155,19 +172,25 @@ export async function handleRequest(req: Request): Promise<Response> {
       if (videoId) {
         return await handleVideoStream(client, req, videoId);
       }
-    } else if (url.pathname.startsWith('/api/hls-segment/')) {
+    }
+
+    if (url.pathname.startsWith('/api/hls-segment/')) {
       const pathParts = url.pathname.split('/');
       const playlistId = pathParts[3]; // Get the playlist ID from the path
       if (playlistId) {
         return await handleVideoStream(client, req, playlistId);
       }
-    } else if (url.pathname.startsWith('/api/stream/')) {
+    }
+
+    if (url.pathname.startsWith('/api/stream/')) {
       const pathParts = url.pathname.split('/');
       const videoId = pathParts[3]; // Get the video ID from the path
       if (videoId) {
         return await streamVideo(req, videoId);
       }
-    } else if (url.pathname === '/api/stream' && url.searchParams.has('id')) {
+    }
+
+    if (url.pathname === '/api/stream' && url.searchParams.has('id')) {
       return await streamVideo(req, url.searchParams.get('id')!);
     }
 

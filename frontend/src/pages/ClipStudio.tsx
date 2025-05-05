@@ -6,6 +6,7 @@ import { fetchVideoDetails } from '../store/slices/videoSlice';
 import { createClip } from '../store/slices/clipSlice';
 import { Video } from '../types';
 import { API_BASE_URL } from '../config';
+import axiosInstance from '../api/axios';
 
 const ClipStudio: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -44,34 +45,48 @@ const ClipStudio: React.FC = () => {
       const hls = new Hls();
       hlsRef.current = hls;
 
-      hls.loadSource(`${API_BASE_URL}/api/hls-playlist/${video.Id}/master`);
-      hls.attachMedia(videoRef.current);
-
-      hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        if (videoRef.current) {
-          videoRef.current.play();
-        }
-      });
-
-      hls.on(Hls.Events.ERROR, (event, data) => {
-        console.error('HLS error:', data);
-        if (data.fatal) {
-          switch (data.type) {
-            case Hls.ErrorTypes.NETWORK_ERROR:
-              console.error('Network error, trying to recover...');
-              hls.startLoad();
-              break;
-            case Hls.ErrorTypes.MEDIA_ERROR:
-              console.error('Media error, trying to recover...');
-              hls.recoverMediaError();
-              break;
-            default:
-              console.error('Fatal error, stopping HLS');
-              hls.destroy();
-              break;
+      // Fetch playlist using axios instance
+      axiosInstance.get(`/api/hls-playlist/${video.Id}`)
+        .then(response => {
+          // Create a blob URL from the playlist content
+          const blob = new Blob([response.data], { type: 'application/vnd.apple.mpegurl' });
+          const url = URL.createObjectURL(blob);
+          
+          // Load the playlist URL into hls.js
+          hls.loadSource(url);
+          if (videoRef.current) {
+            hls.attachMedia(videoRef.current);
           }
-        }
-      });
+
+          hls.on(Hls.Events.MANIFEST_PARSED, () => {
+            if (videoRef.current) {
+              videoRef.current.play();
+            }
+          });
+
+          hls.on(Hls.Events.ERROR, (event, data) => {
+            console.error('HLS error:', data);
+            if (data.fatal) {
+              switch (data.type) {
+                case Hls.ErrorTypes.NETWORK_ERROR:
+                  console.error('Network error, trying to recover...');
+                  hls.startLoad();
+                  break;
+                case Hls.ErrorTypes.MEDIA_ERROR:
+                  console.error('Media error, trying to recover...');
+                  hls.recoverMediaError();
+                  break;
+                default:
+                  console.error('Fatal error, stopping HLS');
+                  hls.destroy();
+                  break;
+              }
+            }
+          });
+        })
+        .catch(error => {
+          console.error('Failed to fetch HLS playlist:', error);
+        });
 
       return () => {
         if (hlsRef.current) {
