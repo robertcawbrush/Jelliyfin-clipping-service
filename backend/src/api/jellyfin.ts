@@ -1,8 +1,6 @@
-// Types for the getItems API parameters
 import { getDynamicHlsApi } from "@jellyfin/sdk/lib/utils/api/dynamic-hls-api.js";
 
 export interface JellyfinGetItemsParams {
-  // Most commonly used parameters
   searchTerm?: string;
   includeItemTypes?: Array<"Movie" | "Series" | "Episode" | "Video">;
   sortBy?: Array<
@@ -36,7 +34,6 @@ export interface JellyfinItem {
   Size?: number;
   Container?: string;
   MediaStreams?: JellyfinMediaStream[];
-  // Add more properties as needed
 }
 
 export interface JellyfinItemsResponse {

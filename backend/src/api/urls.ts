@@ -106,7 +106,7 @@ export async function handleRequest(req: Request): Promise<Response> {
       const pathParts = url.pathname.split("/");
       const videoId = pathParts[3]; // Get the video ID from the path
       if (videoId) {
-        return await handleHlsMasterPlaylist(client, req, videoId);
+        return await handleHlsMasterPlaylist(client, videoId);
       }
     }
 
@@ -114,7 +114,7 @@ export async function handleRequest(req: Request): Promise<Response> {
       const mediaSourceId = url.searchParams.get("mediaSourceId");
 
       if (mediaSourceId) {
-        return await handleHlsMainPlaylist(client, req, mediaSourceId);
+        return await handleHlsMainPlaylist(client, mediaSourceId);
       }
     }
 

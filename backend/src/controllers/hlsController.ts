@@ -3,7 +3,6 @@ import { addCorsHeaders } from "../utils/cors.ts";
 
 export async function handleHlsMasterPlaylist(
   client: JellyfinClient,
-  req: Request,
   videoId: string,
 ): Promise<Response> {
   try {
@@ -40,7 +39,6 @@ export async function handleHlsMasterPlaylist(
 
 export async function handleHlsMainPlaylist(
     client: JellyfinClient,
-    req: Request,
     mediaSourceid: string,
 ): Promise<Response> {
   try {
