@@ -15,12 +15,13 @@ export async function handleHlsMasterPlaylist(
         /(main\.m3u8\?[^ \n\r]*)/,
         `${client.jcsurl}/api/$1`
     );
+    const fixedPlaylist = apiPrependedData.replace(/\\n/g, '\n');
 
-    return new Response(JSON.stringify(apiPrependedData, null, 2), {
+    return new Response(JSON.stringify(fixedPlaylist, null, 2), {
       status: res.status,
       headers: addCorsHeaders(
         new Headers({
-          "Content-Type": "application/json",
+                      "Content-Type": "application/vnd.apple.mpegurl",
         }),
       ),
     });
