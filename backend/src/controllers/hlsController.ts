@@ -1,6 +1,5 @@
 import { JellyfinClient } from "../api/jellyfin.ts";
 import { addCorsHeaders } from "../utils/cors.ts";
-import { getPlaylistsApi } from "npm:@jellyfin/sdk@0.11.0/lib/utils/api";
 
 export async function handleHlsMasterPlaylist(
   client: JellyfinClient,
@@ -9,8 +8,8 @@ export async function handleHlsMasterPlaylist(
 ): Promise<Response> {
   try {
     // masterSourceId is the same as videoId for some reason
-    const playlist = await client.getHlsMasterPlaylist(videoId, videoId);
-    const data = playlist.data.toString();
+    const res = await client.getHlsMasterPlaylist(videoId, videoId);
+    const data = res.data.toString();
 
     const apiPrependedData = data.replace(
         /(main\.m3u8\?[^ \n\r]*)/,
@@ -18,7 +17,7 @@ export async function handleHlsMasterPlaylist(
     );
 
     return new Response(JSON.stringify(apiPrependedData, null, 2), {
-      status: 200,
+      status: res.status,
       headers: addCorsHeaders(
         new Headers({
           "Content-Type": "application/json",
@@ -44,7 +43,7 @@ export async function handleHlsMainPlaylist(
     mediaSourceid: string,
 ): Promise<Response> {
   try {
-    const { data } = await client.getHlsVariantPlaylist(mediaSourceid);
+    const { data, status } = await client.getHlsVariantPlaylist(mediaSourceid);
 
     const apiPrependedData = data.replace(
         /(hls1\/main\/\d+\.ts\?[^ \n\r]*)/g,
@@ -53,7 +52,7 @@ export async function handleHlsMainPlaylist(
     const fixedPlaylist = apiPrependedData.replace(/\\n/g, '\n');
 
     return new Response(fixedPlaylist, {
-      status: 200,
+      status: status,
       headers: addCorsHeaders(
           new Headers({
                         "Content-Type": "application/vnd.apple.mpegurl",
@@ -84,7 +83,7 @@ export async function handleGetVideoSegment(
     actualSegmentLengthTicks: string,
 ): Promise<Response> {
   try {
-    const { data } = await client.getHlsVideoSegment(
+    const res = await client.getHlsVideoSegment(
         itemId,
         playlistId,
         parseInt(segmentId, 10),
@@ -93,8 +92,8 @@ export async function handleGetVideoSegment(
         parseInt(actualSegmentLengthTicks, 10),
     );
 
-    return new Response(data, {
-      status: 200,
+    return new Response(res.data, {
+      status: res.status,
       headers: addCorsHeaders(
           new Headers({
                         "Content-Type": "video/mp2t",
