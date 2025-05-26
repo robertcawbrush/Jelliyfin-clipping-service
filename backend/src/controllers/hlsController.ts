@@ -49,12 +49,13 @@ export async function handleHlsMainPlaylist(
         /(hls1\/main\/\d+\.ts\?[^ \n\r]*)/g,
         `${client.jcsurl}/api/video-segment/$1`
     );
+    const fixedPlaylist = apiPrependedData.replace(/\\n/g, '\n');
 
-    return new Response(JSON.stringify(apiPrependedData, null, 2), {
+    return new Response(fixedPlaylist, {
       status: 200,
       headers: addCorsHeaders(
           new Headers({
-                        "Content-Type": "application/json",
+                        "Content-Type": "application/vnd.apple.mpegurl",
                       }),
       ),
     });
