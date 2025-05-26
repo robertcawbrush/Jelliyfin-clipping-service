@@ -1,6 +1,5 @@
 import { JellyfinClient } from "../api/jellyfin.ts";
 import { addCorsHeaders } from "../utils/cors.ts";
-import { getDynamicHlsApi } from "@jellyfin/sdk/lib/utils/api/dynamic-hls-api.js";
 
 export async function handleHlsPlaylist(
   client: JellyfinClient,
@@ -8,7 +7,6 @@ export async function handleHlsPlaylist(
   videoId: string,
 ): Promise<Response> {
   try {
-    // TODO: make a call to get the master playlist
     // masterSourceId is the same as videoId for some reason
     const playlist = await client.getHlsMasterPlaylist(videoId, videoId);
     const data = playlist.data.toString();
