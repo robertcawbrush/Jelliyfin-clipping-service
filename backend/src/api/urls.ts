@@ -132,22 +132,6 @@ export async function handleRequest(req: Request): Promise<Response> {
   try {
     const client = await getJellyfinClient();
 
-    // HLS routes
-    if (url.pathname.startsWith('/api/hls-playlist/')) {
-      const pathParts = url.pathname.split('/');
-      const videoId = pathParts[3]; // Get the video ID from the path
-      if (videoId && videoId !== 'master') { // Skip if the last part is 'master'
-        return await handleHlsPlaylist(client, req, videoId);
-      }
-    }
-
-    if (url.pathname.startsWith('/api/hls-segment/')) {
-      const segmentPath = url.pathname.split('/api/hls-segment/')[1];
-      if (segmentPath) {
-        return await handleHlsSegment(client, req, segmentPath);
-      }
-    }
-
     // Video routes
     if (url.pathname === '/api/video-search') {
       return await handleVideoSearch(client, req);
@@ -162,36 +146,6 @@ export async function handleRequest(req: Request): Promise<Response> {
       if (videoId) {
         return await handleVideoDetails(client, req, videoId);
       }
-    }
-
-    // Handle both path and query parameter formats for video streaming
-    if (url.pathname.startsWith('/api/hls-playlist/')) {
-      const pathParts = url.pathname.split('/');
-      const videoId = pathParts[3]; // Get the video ID from the path
-      const playlistType = pathParts[4]; // Get the playlist type (master or quality-specific)
-      if (videoId) {
-        return await handleVideoStream(client, req, videoId);
-      }
-    }
-
-    if (url.pathname.startsWith('/api/hls-segment/')) {
-      const pathParts = url.pathname.split('/');
-      const playlistId = pathParts[3]; // Get the playlist ID from the path
-      if (playlistId) {
-        return await handleVideoStream(client, req, playlistId);
-      }
-    }
-
-    if (url.pathname.startsWith('/api/stream/')) {
-      const pathParts = url.pathname.split('/');
-      const videoId = pathParts[3]; // Get the video ID from the path
-      if (videoId) {
-        return await streamVideo(req, videoId);
-      }
-    }
-
-    if (url.pathname === '/api/stream' && url.searchParams.has('id')) {
-      return await streamVideo(req, url.searchParams.get('id')!);
     }
 
     // Auth routes

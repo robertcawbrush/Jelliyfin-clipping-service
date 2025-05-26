@@ -102,30 +102,6 @@ export class JellyfinClient {
     return this.sdkApi;
   }
 
-  async authenticate(
-    username: string,
-    password: string,
-  ): Promise<{ accessToken: string; userId: string }> {
-    try {
-      console.log(`🔑 Authenticating user: ${username}`);
-      const api = this.getSdkApi();
-      const authResult = await api.authenticateUserByName(username, password);
-
-      if (!authResult.data.User) {
-        throw new Error("User data not found in authentication response");
-      }
-
-      console.log(`✅ Authentication successful for user: ${username}`);
-      return {
-        accessToken: authResult.data.AccessToken,
-        userId: authResult.data.User.Id,
-      };
-    } catch (error: any) {
-      console.error(`❌ Authentication failed: ${error.message}`);
-      throw error;
-    }
-  }
-
   async getItems(
     params: JellyfinGetItemsParams,
   ): Promise<JellyfinItemsResponse> {
@@ -163,63 +139,6 @@ export class JellyfinClient {
     });
   }
 
-  async getRecentVideos(limit = 20): Promise<JellyfinItemsResponse> {
-    return this.getItems({
-      includeItemTypes: ["Movie", "Episode", "Video"],
-      recursive: true,
-      limit,
-      fields: ["Path", "Overview", "MediaSources", "MediaStreams"],
-      enableImages: true,
-      imageTypeLimit: 1,
-      sortBy: ["DateCreated"],
-      sortOrder: ["Descending"],
-    });
-  }
-
-  async getHlsStream(
-    itemId: string,
-    mediaSourceId: string,
-    params: {
-      container?: string;
-      static?: boolean;
-      videoCodec?: string;
-      audioCodec?: string;
-      audioBitRate?: number;
-      videoBitRate?: number;
-      width?: number;
-      height?: number;
-      maxWidth?: number;
-      maxHeight?: number;
-      enableAdaptiveBitrateStreaming?: boolean;
-    } = {}
-  ): Promise<{ masterPlaylistUrl: string }> {
-    try {
-      console.log(`🎬 Getting HLS stream for item: ${itemId}`);
-      const api = this.getSdkApi();
-
-      // Get the master playlist URL
-      const masterPlaylistUrl = `${this.baseUrl}/Videos/${itemId}/master.m3u8?` + new URLSearchParams({
-        MediaSourceId: mediaSourceId,
-        Container: params.container || 'ts',
-        Static: params.static?.toString() || 'false',
-        VideoCodec: params.videoCodec || '',
-        AudioCodec: params.audioCodec || '',
-        AudioBitRate: params.audioBitRate?.toString() || '',
-        VideoBitRate: params.videoBitRate?.toString() || '',
-        Width: params.width?.toString() || '',
-        Height: params.height?.toString() || '',
-        MaxWidth: params.maxWidth?.toString() || '',
-        MaxHeight: params.maxHeight?.toString() || '',
-        EnableAdaptiveBitrateStreaming: params.enableAdaptiveBitrateStreaming?.toString() || 'true'
-      }).toString();
-
-      console.log(`✅ HLS stream URL generated: ${masterPlaylistUrl}`);
-      return { masterPlaylistUrl };
-    } catch (error: any) {
-      console.error(`❌ Failed to get HLS stream: ${error.message}`);
-      throw error;
-    }
-  }
 }
 
 export async function initJellyfinClient(): Promise<JellyfinClient> {

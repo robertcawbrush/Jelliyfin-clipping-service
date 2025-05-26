@@ -4,8 +4,6 @@ import Hls from 'hls.js';
 import { useAppDispatch, useAppSelector } from '../hooks';
 import { fetchVideoDetails } from '../store/slices/videoSlice';
 import { createClip } from '../store/slices/clipSlice';
-import { Video } from '../types';
-import { API_BASE_URL } from '../config';
 import axiosInstance from '../api/axios';
 
 const ClipStudio: React.FC = () => {
