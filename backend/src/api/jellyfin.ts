@@ -172,17 +172,17 @@ export class JellyfinClient {
   async getHlsVideoSegment(
       mediaSourceId: string,
       playlistId: string,
-      segmentId: number,
+      segmentId: string,
       container: string,
-      runtimeTicks: number,
-      actualSegmentLengthTicks: number,
+      runtimeTicks: string,
+      actualSegmentLengthTicks: string,
   ): Promise<any> {
     const api = this.getSdkApi();
     const dynamicHlsApi = getDynamicHlsApi(api);
 
     return await dynamicHlsApi.getHlsVideoSegment(
         {
-          itemId: mediaSourceid,
+          itemId: mediaSourceId,
           playlistId,
           segmentId,
           container,

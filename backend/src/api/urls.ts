@@ -105,14 +105,12 @@ export async function handleRequest(req: Request): Promise<Response> {
     if (url.pathname.startsWith("/api/master-hls-playlist/")) {
       const pathParts = url.pathname.split("/");
       const videoId = pathParts[3]; // Get the video ID from the path
-      const playlistType = pathParts[4]; // Get the playlist type (master or quality-specific)
       if (videoId) {
         return await handleHlsMasterPlaylist(client, req, videoId);
       }
     }
 
     if (url.pathname.startsWith("/api/main.m3u8")) {
-      const pathParts = url.pathname.split("/");
       const mediaSourceId = url.searchParams.get("mediaSourceId");
 
       if (mediaSourceId) {
@@ -122,7 +120,7 @@ export async function handleRequest(req: Request): Promise<Response> {
 
     if (url.pathname.startsWith("/api/video-segment/hls1/main/")) {
       const pathParts = url.pathname.split("/");
-      const playlistId = pathParts[2];
+      const playlistId = pathParts[3];
       const file = pathParts[5];
       const [segmentId, container] = file.split(".");
 

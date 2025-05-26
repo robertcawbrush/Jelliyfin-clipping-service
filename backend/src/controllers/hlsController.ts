@@ -1,5 +1,6 @@
 import { JellyfinClient } from "../api/jellyfin.ts";
 import { addCorsHeaders } from "../utils/cors.ts";
+import { getPlaylistsApi } from "npm:@jellyfin/sdk@0.11.0/lib/utils/api";
 
 export async function handleHlsMasterPlaylist(
   client: JellyfinClient,
@@ -77,10 +78,10 @@ export async function handleGetVideoSegment(
     req: Request,
     mediaSourceid: string,
     playlistId: string,
-    segmentId: number,
+    segmentId: string,
     container: string,
-    runtimeTicks: number,
-    actualSegmentLengthTicks: number,
+    runtimeTicks: string,
+    actualSegmentLengthTicks: string,
 ): Promise<Response> {
   try {
     const { data } = await client.getHlsVideoSegment(
