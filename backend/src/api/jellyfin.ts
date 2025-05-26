@@ -1,4 +1,6 @@
 // Types for the getItems API parameters
+import { getDynamicHlsApi } from "@jellyfin/sdk/lib/utils/api/dynamic-hls-api.js";
+
 export interface JellyfinGetItemsParams {
   // Most commonly used parameters
   searchTerm?: string;
@@ -48,22 +50,22 @@ import { Jellyfin } from "@jellyfin/sdk";
 export class JellyfinClient {
   private baseUrl: string;
   private apiKey: string;
+  public jcsurl: string;
   private sdkApi: any | null = null;
   private jellyfin: any | null = null;
 
-  constructor(baseUrl: string, apiKey: string) {
+  constructor(baseUrl: string, apiKey: string, jcsurl: string) {
     this.baseUrl = baseUrl;
     this.apiKey = apiKey;
+    this.jcsurl = jcsurl;
   }
 
-  // Get the Jellyfin SDK API instance
   getSdkApi() {
     console.log(`🔑 Getting SDK API instance...`);
 
     if (!this.sdkApi) {
       console.log(`🔑 Creating new SDK API instance...`);
 
-      // Initialize Jellyfin SDK if not already initialized
       if (!this.jellyfin) {
         this.jellyfin = new Jellyfin({
           clientInfo: {
@@ -139,15 +141,33 @@ export class JellyfinClient {
     });
   }
 
+  async getHlsMasterPlaylist(
+    videoId: string,
+    mediaSourceId: string,
+  ): Promise<any> {
+    const api = this.getSdkApi();
+    const dynamicHlsApi = getDynamicHlsApi(api);
+
+    return await dynamicHlsApi.getMasterHlsVideoPlaylist(
+      {
+        itemId: videoId,
+        mediaSourceId: mediaSourceId,
+      },
+    );
+  }
 }
 
 export async function initJellyfinClient(): Promise<JellyfinClient> {
   const JELLYFIN_URL = Deno.env.get("JELLYFIN_URL")?.replace(/\/$/, "");
   const JELLYFIN_API_KEY = Deno.env.get("JELLYFIN_API_KEY");
+  const JCS_URL = Deno.env.get("JCS_URL");
+  const JCS_PORT = Deno.env.get("JCS_PORT");
 
-  if (!JELLYFIN_URL || !JELLYFIN_API_KEY) {
+  if (!JELLYFIN_URL || !JELLYFIN_API_KEY || !JCS_URL || !JCS_PORT) {
     throw new Error("Missing Jellyfin configuration!");
   }
 
-  return new JellyfinClient(JELLYFIN_URL, JELLYFIN_API_KEY);
+  const jcsurl = `${JCS_URL}:${JCS_PORT}`;
+
+  return new JellyfinClient(JELLYFIN_URL, JELLYFIN_API_KEY, jcsurl);
 }

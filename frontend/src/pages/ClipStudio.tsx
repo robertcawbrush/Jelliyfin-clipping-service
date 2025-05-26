@@ -47,7 +47,9 @@ const ClipStudio: React.FC = () => {
       axiosInstance.get(`/api/hls-playlist/${video.Id}`)
         .then(response => {
           // Create a blob URL from the playlist content
-          const url = URL.createObjectURL(response.data);
+          const blob = new Blob([response.data], { type: 'application/vnd.apple.mpegurl' });
+
+          const url = URL.createObjectURL(blob);
           
           // Load the playlist URL into hls.js
           hls.loadSource(url);

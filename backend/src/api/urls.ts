@@ -1,13 +1,13 @@
 // use this to setup the URLS
 
 import { Video } from "./models.ts";
-import { addVideo, getVideoByJellyfinId, createClip, getClipsByUserId, getClipById, deleteClip } from "../db/index.ts";
-import { JellyfinClient, initJellyfinClient } from "./jellyfin.ts";
+import { addVideo, getVideoByJellyfinId} from "../db/index.ts";
+import { initJellyfinClient } from "./jellyfin.ts";
 import { addCorsHeaders } from "../utils/cors.ts";
-import { handleVideoSearch, handleVideoById, handleVideoStream, handleVideoDetails } from "../controllers/videoController.ts";
+import { handleVideoSearch, handleVideoById, handleVideoDetails } from "../controllers/videoController.ts";
 import { handleLogin } from "../controllers/authController.ts";
 import { handleGetClips, handleCreateClip, handleDeleteClip } from "../controllers/clipController.ts";
-import { handleHlsPlaylist, handleHlsSegment } from "../controllers/hlsController.ts";
+import { handleHlsPlaylist } from "../controllers/hlsController.ts";
 
 let jellyfin: Awaited<ReturnType<typeof initJellyfinClient>>;
 
@@ -71,53 +71,6 @@ async function getVideoById(id: string): Promise<Video> {
   return newVideo;
 }
 
-async function streamVideo(req: Request, videoId: string): Promise<Response> {
-  console.log(`🎬 Starting video stream: ${videoId}`);
-  
-  const client = await getJellyfinClient();
-  const range = req.headers.get('range');
-  const streamUrl = `${client['baseUrl']}/Videos/${videoId}/stream`;
-  
-  const streamResponse = await fetch(streamUrl, {
-    headers: {
-      'X-MediaBrowser-Token': client['apiKey'],
-      ...(range ? { 'Range': range } : {}),
-    }
-  });
-  
-  if (!streamResponse.ok) {
-    console.error(`❌ Failed to stream video: ${streamResponse.statusText}`);
-    throw new Error(`Failed to stream video: ${streamResponse.statusText}`);
-  }
-  
-  console.log(`✅ Stream established`);
-  
-  const headers = new Headers();
-  [
-    'content-type',
-    'content-length',
-    'content-range',
-    'accept-ranges',
-  ].forEach(header => {
-    const value = streamResponse.headers.get(header);
-    if (value) headers.set(header, value);
-  });
-  
-  if (Deno.env.get("CORS") === 'true') {
-    headers.set('Access-Control-Allow-Origin', '*');
-    headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
-    headers.set('Access-Control-Allow-Headers', '*');
-  }
-  
-  const { readable, writable } = new TransformStream();
-  streamResponse.body?.pipeTo(writable);
-  
-  return new Response(readable, {
-    status: streamResponse.status,
-    headers
-  });
-}
-
 export async function handleRequest(req: Request): Promise<Response> {
   const url = new URL(req.url);
   
@@ -131,6 +84,16 @@ export async function handleRequest(req: Request): Promise<Response> {
 
   try {
     const client = await getJellyfinClient();
+
+    // hls stream routes
+    if (url.pathname.startsWith('/api/hls-playlist/')) {
+      const pathParts = url.pathname.split('/');
+      const videoId = pathParts[3]; // Get the video ID from the path
+      const playlistType = pathParts[4]; // Get the playlist type (master or quality-specific)
+      if (videoId) {
+        return await handleHlsPlaylist(client, req, videoId);
+      }
+    }
 
     // Video routes
     if (url.pathname === '/api/video-search') {
