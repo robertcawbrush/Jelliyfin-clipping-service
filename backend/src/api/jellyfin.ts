@@ -189,7 +189,10 @@ export class JellyfinClient {
           container,
           runtimeTicks,
           actualSegmentLengthTicks,
+          playSessionId: "jelly-clipping-service",
+          deviceProfileId: "jelly-clipping-service",
         },
+        { responseType: "arraybuffer" },
     );
   }
 }
