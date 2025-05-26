@@ -71,3 +71,44 @@ export async function handleHlsMainPlaylist(
     });
   }
 }
+
+export async function handleGetVideoSegment(
+    client: JellyfinClient,
+    req: Request,
+    mediaSourceid: string,
+    playlistId: string,
+    segmentId: number,
+    container: string,
+    runtimeTicks: number,
+    actualSegmentLengthTicks: number,
+): Promise<Response> {
+  try {
+    const { data } = await client.getHlsVideoSegment(
+        mediaSourceid,
+        playlistId,
+        segmentId,
+        container,
+        runtimeTicks,
+        actualSegmentLengthTicks,
+    );
+
+    return new Response(data, {
+      status: 200,
+      headers: addCorsHeaders(
+          new Headers({
+                        "Content-Type": "application/vnd.apple.mpegurl",
+                      }),
+      ),
+    });
+  } catch (error: any) {
+    console.error(`❌ Failed to get HLS segment ${segment}.${container} ${error.message}`);
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: addCorsHeaders(
+          new Headers({
+                        "Content-Type": "application/json",
+                      }),
+      ),
+    });
+  }
+}

@@ -169,6 +169,28 @@ export class JellyfinClient {
         },
     );
   }
+  async getHlsVideoSegment(
+      mediaSourceId: string,
+      playlistId: string,
+      segmentId: number,
+      container: string,
+      runtimeTicks: number,
+      actualSegmentLengthTicks: number,
+  ): Promise<any> {
+    const api = this.getSdkApi();
+    const dynamicHlsApi = getDynamicHlsApi(api);
+
+    return await dynamicHlsApi.getHlsVideoSegment(
+        {
+          itemId: mediaSourceid,
+          playlistId,
+          segmentId,
+          container,
+          runtimeTicks,
+          actualSegmentLengthTicks,
+        },
+    );
+  }
 }
 
 export async function initJellyfinClient(): Promise<JellyfinClient> {
