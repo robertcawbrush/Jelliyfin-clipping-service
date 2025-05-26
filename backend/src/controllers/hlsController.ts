@@ -76,7 +76,7 @@ export async function handleHlsMainPlaylist(
 export async function handleGetVideoSegment(
     client: JellyfinClient,
     req: Request,
-    mediaSourceid: string,
+    itemId: string,
     playlistId: string,
     segmentId: string,
     container: string,
@@ -85,24 +85,24 @@ export async function handleGetVideoSegment(
 ): Promise<Response> {
   try {
     const { data } = await client.getHlsVideoSegment(
-        mediaSourceid,
+        itemId,
         playlistId,
-        segmentId,
+        parseInt(segmentId, 10),
         container,
-        runtimeTicks,
-        actualSegmentLengthTicks,
+        parseInt(runtimeTicks, 10),
+        parseInt(actualSegmentLengthTicks, 10),
     );
 
     return new Response(data, {
       status: 200,
       headers: addCorsHeaders(
           new Headers({
-                        "Content-Type": "application/vnd.apple.mpegurl",
+                        "Content-Type": "video/mp2t",
                       }),
       ),
     });
   } catch (error: any) {
-    console.error(`❌ Failed to get HLS segment ${segment}.${container} ${error.message}`);
+    console.error(`❌ Failed to get HLS segment ${segmentId}.${container} ${error.message}`);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: addCorsHeaders(

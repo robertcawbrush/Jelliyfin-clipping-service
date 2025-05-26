@@ -46,6 +46,7 @@ export interface JellyfinItemsResponse {
 }
 
 import { Jellyfin } from "@jellyfin/sdk";
+import { AxiosResponse } from "npm:axios@1.8.4";
 
 export class JellyfinClient {
   private baseUrl: string;
@@ -170,19 +171,19 @@ export class JellyfinClient {
     );
   }
   async getHlsVideoSegment(
-      mediaSourceId: string,
+      itemId: string,
       playlistId: string,
-      segmentId: string,
+      segmentId: number,
       container: string,
-      runtimeTicks: string,
-      actualSegmentLengthTicks: string,
-  ): Promise<any> {
+      runtimeTicks: number,
+      actualSegmentLengthTicks: number,
+  ): Promise<AxiosResponse<File, any>> {
     const api = this.getSdkApi();
     const dynamicHlsApi = getDynamicHlsApi(api);
 
     return await dynamicHlsApi.getHlsVideoSegment(
         {
-          itemId: mediaSourceId,
+          itemId,
           playlistId,
           segmentId,
           container,

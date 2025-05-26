@@ -124,14 +124,14 @@ export async function handleRequest(req: Request): Promise<Response> {
       const file = pathParts[5];
       const [segmentId, container] = file.split(".");
 
-      const mediaSourceId = url.searchParams.get("mediaSourceId");
+      const itemId = url.searchParams.get("mediaSourceId");
       const runtimeTicks = url.searchParams.get("runtimeTicks");
       const actualSegmentLengthTicks = url.searchParams.get(
         "actualSegmentLengthTicks",
       );
 
       if (
-        mediaSourceId &&
+        itemId &&
         runtimeTicks &&
         actualSegmentLengthTicks &&
         segmentId &&
@@ -140,7 +140,7 @@ export async function handleRequest(req: Request): Promise<Response> {
         return await handleGetVideoSegment(
           client,
           req,
-          mediaSourceId,
+          itemId,
           playlistId,
           segmentId,
           container,

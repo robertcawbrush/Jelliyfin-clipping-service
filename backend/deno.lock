@@ -3,6 +3,7 @@
   "specifiers": {
     "npm:@jellyfin/sdk@0.11.0": "0.11.0_axios@1.8.4",
     "npm:@types/node@*": "22.5.4",
+    "npm:axios@1.8.4": "1.8.4",
     "npm:drizzle-orm@0.29.3": "0.29.3"
   },
   "npm": {
