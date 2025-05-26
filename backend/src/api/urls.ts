@@ -1,13 +1,13 @@
 // use this to setup the URLS
 
-import { Video } from "./models.ts";
+import { Video, videos } from "./models.ts";
 import { addVideo, getVideoByJellyfinId} from "../db/index.ts";
 import { initJellyfinClient } from "./jellyfin.ts";
 import { addCorsHeaders } from "../utils/cors.ts";
 import { handleVideoSearch, handleVideoById, handleVideoDetails } from "../controllers/videoController.ts";
 import { handleLogin } from "../controllers/authController.ts";
 import { handleGetClips, handleCreateClip, handleDeleteClip } from "../controllers/clipController.ts";
-import { handleHlsPlaylist } from "../controllers/hlsController.ts";
+import { handleHlsMainPlaylist, handleHlsMasterPlaylist } from "../controllers/hlsController.ts";
 
 let jellyfin: Awaited<ReturnType<typeof initJellyfinClient>>;
 
@@ -86,12 +86,21 @@ export async function handleRequest(req: Request): Promise<Response> {
     const client = await getJellyfinClient();
 
     // hls stream routes
-    if (url.pathname.startsWith('/api/hls-playlist/')) {
+    if (url.pathname.startsWith('/api/master-hls-playlist/')) {
       const pathParts = url.pathname.split('/');
       const videoId = pathParts[3]; // Get the video ID from the path
       const playlistType = pathParts[4]; // Get the playlist type (master or quality-specific)
       if (videoId) {
-        return await handleHlsPlaylist(client, req, videoId);
+        return await handleHlsMasterPlaylist(client, req, videoId);
+      }
+    }
+
+    if (url.pathname.startsWith('/api/main.m3u8')) {
+      const pathParts = url.pathname.split('/');
+      const mediaSourceId = url.searchParams.get('mediaSourceId');
+
+      if(mediaSourceId) {
+        return await handleHlsMainPlaylist(client, req, mediaSourceId)
       }
     }
 

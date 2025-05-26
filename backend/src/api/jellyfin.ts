@@ -155,6 +155,20 @@ export class JellyfinClient {
       },
     );
   }
+
+  async getHlsVariantPlaylist(
+      mediaSourceId: string,
+  ): Promise<any> {
+    const api = this.getSdkApi();
+    const dynamicHlsApi = getDynamicHlsApi(api);
+
+    return await dynamicHlsApi.getVariantHlsVideoPlaylist(
+        {
+          itemId: mediaSourceId,
+          mediaSourceId: mediaSourceId,
+        },
+    );
+  }
 }
 
 export async function initJellyfinClient(): Promise<JellyfinClient> {

@@ -1,7 +1,7 @@
 import { JellyfinClient } from "../api/jellyfin.ts";
 import { addCorsHeaders } from "../utils/cors.ts";
 
-export async function handleHlsPlaylist(
+export async function handleHlsMasterPlaylist(
   client: JellyfinClient,
   req: Request,
   videoId: string,
@@ -25,13 +25,47 @@ export async function handleHlsPlaylist(
       ),
     });
   } catch (error: any) {
-    console.error(`❌ Failed to get HLS playlist: ${error.message}`);
+    console.error(`❌ Failed to get HLS Master playlist: ${error.message}`);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: addCorsHeaders(
         new Headers({
           "Content-Type": "application/json",
         }),
+      ),
+    });
+  }
+}
+
+export async function handleHlsMainPlaylist(
+    client: JellyfinClient,
+    req: Request,
+    mediaSourceid: string,
+): Promise<Response> {
+  try {
+    const { data } = await client.getHlsVariantPlaylist(mediaSourceid);
+
+    const apiPrependedData = data.replace(
+        /(hls1\/main\/\d+\.ts\?[^ \n\r]*)/g,
+        `${client.jcsurl}/api/video-segment/$1`
+    );
+
+    return new Response(JSON.stringify(apiPrependedData, null, 2), {
+      status: 200,
+      headers: addCorsHeaders(
+          new Headers({
+                        "Content-Type": "application/json",
+                      }),
+      ),
+    });
+  } catch (error: any) {
+    console.error(`❌ Failed to get HLS Main playlist: ${error.message}`);
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: addCorsHeaders(
+          new Headers({
+                        "Content-Type": "application/json",
+                      }),
       ),
     });
   }
