@@ -181,16 +181,18 @@ export class JellyfinClient {
     const api = this.getSdkApi();
     const dynamicHlsApi = getDynamicHlsApi(api);
 
+    const uuid = crypto.randomUUID();
     return await dynamicHlsApi.getHlsVideoSegment(
         {
           itemId,
-          playlistId,
+          playlistId: `hls${uuid}`,
           segmentId,
           container,
           runtimeTicks,
           actualSegmentLengthTicks,
-          playSessionId: "jelly-clipping-service",
-          deviceProfileId: "jelly-clipping-service",
+          deviceId: `jelly-clipping-service-device-id`,
+          mediaSourceId: itemId,
+          maxWidth: 1920,
         },
         { responseType: "arraybuffer" },
     );
