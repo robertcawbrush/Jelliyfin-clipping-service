@@ -8,8 +8,8 @@ const VideoDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { searchResults, loading, error } = useAppSelector((state) => state.videos);
-  const video = searchResults.find(v => v.Id === id);
+  const { videoDetails: videoDetailsData, loading, error } = useAppSelector((state) => state.videos);
+  const video = videoDetailsData;
 
   useEffect(() => {
     if (id) {

@@ -4,6 +4,7 @@ import { JellyfinSearchResponse, Video } from '../../types';
 
 interface VideoState {
   searchResults: Video[];
+  videoDetails: Video | null;
   loading: boolean;
   error: string | null;
   totalCount: number;
@@ -13,6 +14,7 @@ interface VideoState {
 
 const initialState: VideoState = {
   searchResults: [],
+  videoDetails: null,
   loading: false,
   error: null,
   totalCount: 0,
@@ -40,7 +42,7 @@ export const fetchVideoDetails = createAsyncThunk(
   'videos/fetchDetails',
   async (videoId: string, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get<Video>(`/api/video-details/${videoId}`);
+      const response = await axiosInstance.get<Video>(`/api/video?id=${videoId}`);
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || 'Failed to fetch video details');
@@ -87,11 +89,7 @@ const videoSlice = createSlice({
       })
       .addCase(fetchVideoDetails.fulfilled, (state, action) => {
         state.loading = false;
-        // Update the video in search results if it exists
-        const index = state.searchResults.findIndex(v => v.Id === action.payload.Id);
-        if (index !== -1) {
-          state.searchResults[index] = action.payload;
-        }
+        state.videoDetails = action.payload;
       })
       .addCase(fetchVideoDetails.rejected, (state, action) => {
         state.loading = false;

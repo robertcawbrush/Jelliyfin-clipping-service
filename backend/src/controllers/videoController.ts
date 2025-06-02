@@ -67,9 +67,24 @@ export async function handleVideoById(client: JellyfinClient, videoId: string): 
   console.log(`📝 GET /api/video/${videoId}`);
   
   try {
-    let video = null
-    
-    console.log(`✅ Successfully served video metadata: ${video?.name}`);
+
+    const params = {
+      ids: [videoId],
+      fields: ['Path', 'Overview', 'MediaSources', 'MediaStreams'],
+    }
+
+    const api = client.getSdkApi();
+    const response = await getItemsApi(api).getItems(params)
+
+
+     if (!response.data.Items) {
+      console.error(`❌ No video found with id of  ${videoId}`);
+      throw new Error(`No video found with id of  ${videoId}`);
+    }
+
+    const video = response.data.Items[0];
+
+    console.log(`✅ Successfully served video by id: ${video?.name}`);
     return new Response(JSON.stringify(video), {
       status: 200,
       headers: addCorsHeaders(new Headers({
