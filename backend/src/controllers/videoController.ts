@@ -63,7 +63,6 @@ export async function handleVideoSearch(client: JellyfinClient, req: Request): P
 }
 
 export async function handleVideoById(client: JellyfinClient, videoId: string): Promise<Response> {
-  // TODO: not used yet
   console.log(`📝 GET /api/video/${videoId}`);
   
   try {
