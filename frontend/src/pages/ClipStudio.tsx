@@ -10,10 +10,9 @@ const ClipStudio: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { searchResults, loading, error } = useAppSelector(
+  const { videoDetails: video, loading, error } = useAppSelector(
     (state) => state.videos,
   );
-  const video = searchResults.find((v) => v.Id === id);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);

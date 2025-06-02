@@ -70,7 +70,7 @@ export async function handleVideoById(client: JellyfinClient, videoId: string): 
 
     const params = {
       ids: [videoId],
-      fields: ['Path', 'Overview', 'MediaSources', 'MediaStreams'],
+      fields: ['Overview', 'MediaSources', 'MediaStreams'],
     }
 
     const api = client.getSdkApi();
