@@ -67,7 +67,6 @@ export async function handleRequest(req: Request): Promise<Response> {
 
     if (url.pathname.startsWith("/api/video-segment/hls1/main/")) {
       const pathParts = url.pathname.split("/");
-      const playlistId = pathParts[3];
       const file = pathParts[5];
       const [segmentId, container] = file.split(".");
 
@@ -86,9 +85,7 @@ export async function handleRequest(req: Request): Promise<Response> {
       ) {
         return await handleGetVideoSegment(
           client,
-          req,
           itemId,
-          playlistId,
           segmentId,
           container,
           runtimeTicks,

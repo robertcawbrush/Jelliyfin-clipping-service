@@ -73,9 +73,7 @@ export async function handleHlsMainPlaylist(
 
 export async function handleGetVideoSegment(
     client: JellyfinClient,
-    req: Request,
     itemId: string,
-    playlistId: string,
     segmentId: string,
     container: string,
     runtimeTicks: string,
@@ -84,7 +82,6 @@ export async function handleGetVideoSegment(
   try {
     const res = await client.getHlsVideoSegment(
         itemId,
-        playlistId,
         parseInt(segmentId, 10),
         container,
         parseInt(runtimeTicks, 10),

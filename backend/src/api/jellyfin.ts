@@ -145,7 +145,6 @@ export class JellyfinClient {
   }
   async getHlsVideoSegment(
       itemId: string,
-      playlistId: string,
       segmentId: number,
       container: string,
       runtimeTicks: number,
