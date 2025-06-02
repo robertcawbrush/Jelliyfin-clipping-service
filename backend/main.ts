@@ -6,13 +6,7 @@ import { handleRequest } from "./src/api/urls.ts";
 async function startServer() {
   await load({ envPath: "./.env", export: true });
 
-  console.log(`\n🚀 Server starting up...
-🔌 API endpoints:
-   - GET /api/video?id=<video_id>  (metadata)
-   - GET /api/stream?id=<video_id> (video stream)
-   - GET /api/videos/search?q=<term>&limit=<number>
-   - GET /api/videos/recent?limit=<number>
-⏳ Waiting for requests...\n`);
+  console.log(`\n🚀 Server starting up...`);
 
   Deno.serve(handleRequest);
 }
