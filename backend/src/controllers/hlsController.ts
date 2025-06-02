@@ -7,8 +7,8 @@ export async function handleHlsMasterPlaylist(
 ): Promise<Response> {
   try {
     // masterSourceId is the same as videoId for some reason
-    const res = await client.getHlsMasterPlaylist(videoId, videoId);
-    const data = res.data.toString();
+    const masterPlaylistResponse = await client.getHlsMasterPlaylist(videoId, videoId);
+    const data = masterPlaylistResponse.data.toString();
 
     const apiPrependedData = data.replace(
         /(main\.m3u8\?[^ \n\r]*)/,

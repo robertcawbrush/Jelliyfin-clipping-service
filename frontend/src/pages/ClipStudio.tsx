@@ -14,6 +14,8 @@ const ClipStudio: React.FC = () => {
     (state) => state.videos,
   );
 
+  const userId = useAppSelector(state => state.auth.userId)
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
   const [startTime, setStartTime] = useState('00:00:00');
