@@ -1,5 +1,3 @@
-import { Video } from "./models.ts";
-import { addVideo, getVideoByJellyfinId } from "../db/index.ts";
 import { initJellyfinClient } from "./jellyfin.ts";
 import { addCorsHeaders } from "../utils/cors.ts";
 import {
@@ -8,11 +6,6 @@ import {
   handleVideoSearch,
 } from "../controllers/videoController.ts";
 import { handleLogin } from "../controllers/authController.ts";
-import {
-  handleCreateClip,
-  handleDeleteClip,
-  handleGetClips,
-} from "../controllers/clipController.ts";
 import {
   handleGetVideoSegment,
   handleHlsMainPlaylist,
@@ -40,52 +33,6 @@ async function getJellyfinClient() {
   return jellyfin;
 }
 
-async function getVideoById(id: string): Promise<Video> {
-  console.log(`🔍 Fetching video: ${id}`);
-
-  const client = await getJellyfinClient();
-
-  const localVideo = await getVideoByJellyfinId(id);
-  if (localVideo) {
-    console.log(`✅ Found video in cache: ${localVideo.name}`);
-    return localVideo;
-  }
-
-  const response = await fetch(`${client["baseUrl"]}/Items/${id}`, {
-    headers: {
-      "X-MediaBrowser-Token": client["apiKey"],
-    },
-  });
-
-  if (!response.ok) {
-    console.error(`❌ Failed to fetch video: ${response.statusText}`);
-    throw new Error(`Failed to fetch video: ${response.statusText}`);
-  }
-
-  const video = await response.json();
-  console.log(`✅ Found video in Jellyfin: ${video.Name}`);
-
-  const newVideo = await addVideo({
-    jellyfinId: id,
-    name: video.Name,
-    path: video.Path,
-    type: video.Type,
-    duration: video.RunTimeTicks
-      ? Math.floor(video.RunTimeTicks / 10000000)
-      : null,
-    size: video.Size || null,
-    container: video.Container || null,
-    videoCodec: video.MediaStreams?.find((s: { Type: string }) =>
-      s.Type === "Video"
-    )?.Codec || null,
-    audioCodec: video.MediaStreams?.find((s: { Type: string }) =>
-      s.Type === "Audio"
-    )?.Codec || null,
-  });
-
-  console.log(`💾 Cached video metadata`);
-  return newVideo;
-}
 
 export async function handleRequest(req: Request): Promise<Response> {
   const url = new URL(req.url);
@@ -169,21 +116,6 @@ export async function handleRequest(req: Request): Promise<Response> {
     // Auth routes
     if (url.pathname === "/api/auth/login" && req.method === "POST") {
       return await handleLogin(client, req);
-    }
-
-    // Clips routes
-    if (url.pathname === "/api/clips") {
-      if (req.method === "GET") {
-        return await handleGetClips(req);
-      }
-      if (req.method === "POST") {
-        return await handleCreateClip(req);
-      }
-    }
-
-    if (url.pathname.startsWith("/api/clips/") && req.method === "DELETE") {
-      const clipId = parseInt(url.pathname.split("/").pop()!);
-      return await handleDeleteClip(req, clipId);
     }
 
     // Not found

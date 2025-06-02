@@ -1,5 +1,3 @@
-import { Video } from "../api/models.ts";
-import { addVideo, getVideoByJellyfinId } from "../db/index.ts";
 import { JellyfinClient } from "../api/jellyfin.ts";
 import { addCorsHeaders } from "../utils/cors.ts";
 import { getItemsApi } from "@jellyfin/sdk/lib/utils/api/items-api.js";
@@ -39,7 +37,6 @@ export async function handleVideoSearch(client: JellyfinClient, req: Request): P
     // Use the SDK to get video details
     const response = await getItemsApi(api).getItems(searchParams)
 
-    
     // Check if Items exists in the response
     if (!response.data.Items) {
       console.error(`❌ No items found in the response`);
@@ -66,12 +63,13 @@ export async function handleVideoSearch(client: JellyfinClient, req: Request): P
 }
 
 export async function handleVideoById(client: JellyfinClient, videoId: string): Promise<Response> {
+  // TODO: not used yet
   console.log(`📝 GET /api/video/${videoId}`);
   
   try {
-    const video = await getVideoMetadata(client, videoId);
+    let video = null
     
-    console.log(`✅ Successfully served video metadata: ${video.name}`);
+    console.log(`✅ Successfully served video metadata: ${video?.name}`);
     return new Response(JSON.stringify(video), {
       status: 200,
       headers: addCorsHeaders(new Headers({
@@ -139,47 +137,3 @@ export async function handleVideoDetails(client: JellyfinClient, req: Request, v
     });
   }
 }
-
-// Helper function to get video metadata
-async function getVideoMetadata(client: JellyfinClient, id: string): Promise<Video> {
-  console.log(`🔍 Fetching video: ${id}`);
-  
-  const localVideo = await getVideoByJellyfinId(id);
-  if (localVideo) {
-    console.log(`✅ Found video in cache: ${localVideo.name}`);
-    return localVideo;
-  }
-  
-  // Get the shared API instance from the client
-  const api = client.getSdkApi();
-  
-  // Get the ItemsApi using the helper function
-  const itemsApi = getItemsApi(api);
-  
-  // Use the SDK to get video details
-  const response = await itemsApi.getItems({
-    ids: [id]
-  });
-  
-  if (!response.data.Items || response.data.Items.length === 0) {
-    throw new Error(`Failed to fetch video: Item not found`);
-  }
-  
-  const video = response.data.Items[0];
-  console.log(`✅ Found video in Jellyfin: ${video.Name}`);
-  
-  const newVideo = await addVideo({
-    jellyfinId: id,
-    name: video.Name || 'Unknown',
-    path: video.Path || '',
-    type: video.Type || 'Unknown',
-    duration: video.RunTimeTicks ? Math.floor(video.RunTimeTicks / 10000000) : null,
-    size: null, // Size is not available in the SDK response
-    container: null, // Container is not available in the SDK response
-    videoCodec: video.MediaStreams?.find((s: any) => s.Type === 'Video')?.Codec || null,
-    audioCodec: video.MediaStreams?.find((s: any) => s.Type === 'Audio')?.Codec || null
-  });
-
-  console.log(`💾 Cached video metadata`);
-  return newVideo;
-} 

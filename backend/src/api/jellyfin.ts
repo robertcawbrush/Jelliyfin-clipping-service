@@ -59,7 +59,6 @@ export class JellyfinClient {
   }
 
   getSdkApi() {
-    console.log(`🔑 Getting SDK API instance...`);
 
     if (!this.sdkApi) {
       console.log(`🔑 Creating new SDK API instance...`);
@@ -91,12 +90,6 @@ export class JellyfinClient {
         "X-MediaBrowser-Token": this.apiKey,
       };
 
-      console.log(
-        `🔑 API key set in headers:`,
-        this.sdkApi.configuration.headers,
-      );
-    } else {
-      console.log(`🔑 Using existing SDK API instance`);
     }
 
     return this.sdkApi;
@@ -120,23 +113,6 @@ export class JellyfinClient {
       console.error(`❌ Failed to get items: ${error.message}`);
       throw error;
     }
-  }
-
-  async searchVideos(
-    searchTerm?: string,
-    limit = 20,
-  ): Promise<JellyfinItemsResponse> {
-    return this.getItems({
-      searchTerm,
-      includeItemTypes: ["Movie", "Episode", "Video"],
-      recursive: true,
-      limit,
-      fields: ["Path", "Overview", "MediaSources", "MediaStreams"],
-      enableImages: true,
-      imageTypeLimit: 1,
-      sortBy: ["Name"],
-      sortOrder: ["Ascending"],
-    });
   }
 
   async getHlsMasterPlaylist(
