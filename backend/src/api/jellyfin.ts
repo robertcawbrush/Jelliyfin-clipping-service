@@ -1,4 +1,5 @@
 import { getDynamicHlsApi } from "@jellyfin/sdk/lib/utils/api/dynamic-hls-api.js";
+import { getSessionApi } from "@jellyfin/sdk/lib/utils/api/session-api.js";
 
 export interface JellyfinGetItemsParams {
   searchTerm?: string;
@@ -44,6 +45,7 @@ export interface JellyfinItemsResponse {
 
 import { Jellyfin } from "@jellyfin/sdk";
 import { AxiosResponse } from "npm:axios@1.8.4";
+import { CLIENT_NAME } from "./constants.ts";
 
 export class JellyfinClient {
   private baseUrl: string;
@@ -59,14 +61,13 @@ export class JellyfinClient {
   }
 
   getSdkApi() {
-
     if (!this.sdkApi) {
       console.log(`🔑 Creating new SDK API instance...`);
 
       if (!this.jellyfin) {
         this.jellyfin = new Jellyfin({
           clientInfo: {
-            name: "JellyfinClippingService",
+            name: CLIENT_NAME,
             version: "1.0.0",
           },
           deviceInfo: {
@@ -111,6 +112,24 @@ export class JellyfinClient {
       return response.data;
     } catch (error: any) {
       console.error(`❌ Failed to get items: ${error.message}`);
+      throw error;
+    }
+  }
+
+  async getSessions(): Promise<any> {
+    try {
+      const api = this.getSdkApi();
+      const sessionApi = getSessionApi(api);
+
+     const sessionsResponse = await sessionApi.getSessions();
+
+      if(!sessionsResponse) {
+        throw new Error("No sessions found")
+      }
+
+      return sessionsResponse.data;
+    } catch (error: any) {
+      console.error(`❌ Failed to get sessions from jellyfin: ${error.message}`);
       throw error;
     }
   }
@@ -165,6 +184,10 @@ export class JellyfinClient {
           deviceId: `jelly-clipping-service-device-id`,
           mediaSourceId: itemId,
           maxWidth: 1920,
+          videoCodec: "copy",
+          audioCodec: "copy",
+          // i need a specific playSessionId here
+          playSessionId: "12fd74621c7f4e7b869200b86d4e3cc6",
         },
         { responseType: "arraybuffer" },
     );

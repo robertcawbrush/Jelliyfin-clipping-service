@@ -5,7 +5,7 @@ import {
   handleVideoDetails,
   handleVideoSearch,
 } from "../controllers/videoController.ts";
-import { handleLogin } from "../controllers/authController.ts";
+import { handleGetSessions, handleLogin } from "../controllers/authController.ts";
 import {
   handleGetVideoSegment,
   handleHlsMainPlaylist,
@@ -113,6 +113,11 @@ export async function handleRequest(req: Request): Promise<Response> {
     // Auth routes
     if (url.pathname === "/api/auth/login" && req.method === "POST") {
       return await handleLogin(client, req);
+    }
+
+    //Session route
+    if (url.pathname.startsWith("/api/sessions/")) {
+      return await handleGetSessions(client);
     }
 
     // Not found
