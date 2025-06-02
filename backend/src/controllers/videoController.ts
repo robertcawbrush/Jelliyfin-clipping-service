@@ -66,7 +66,6 @@ export async function handleVideoById(client: JellyfinClient, videoId: string): 
   console.log(`📝 GET /api/video/${videoId}`);
   
   try {
-
     const params = {
       ids: [videoId],
       fields: ['Overview', 'MediaSources', 'MediaStreams'],
@@ -83,7 +82,7 @@ export async function handleVideoById(client: JellyfinClient, videoId: string): 
 
     const video = response.data.Items[0];
 
-    console.log(`✅ Successfully served video by id: ${video?.name}`);
+    console.log(`✅ Successfully served video by id: ${video?.Name}`);
     return new Response(JSON.stringify(video), {
       status: 200,
       headers: addCorsHeaders(new Headers({
