@@ -14,7 +14,7 @@ const ClipStudio: React.FC = () => {
     (state) => state.videos,
   );
 
-  const userId = useAppSelector(state => state.auth.userId)
+  const sessionId = useAppSelector(state => state.auth.sessionId)
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
@@ -50,7 +50,7 @@ const ClipStudio: React.FC = () => {
 
       // Fetch playlist using axios instance
       axiosInstance
-        .get(`/api/master-hls-playlist/${video.Id}`)
+        .get(`/api/master-hls-playlist/${video.Id}/${sessionId}`)
         .then((response) => {
           // Create a blob URL from the playlist content
           const blob = new Blob([response.data], {

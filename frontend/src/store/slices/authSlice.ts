@@ -7,7 +7,6 @@ interface AuthState {
     userId: string | null;
     loading: boolean;
     error: string | null;
-    sessionId: string | null;
 }
 
 const initialState: AuthState = {
@@ -16,7 +15,6 @@ const initialState: AuthState = {
     userId: null,
     loading: false,
     error: null,
-    sessionId: null,
 };
 
 // Load initial state from localStorage if available
@@ -52,22 +50,6 @@ export const logoutUser = createAsyncThunk(
         // Clear localStorage
         localStorage.removeItem('auth');
         return null;
-    },
-);
-
-
-export const fetchSession = createAsyncThunk(
-    'auth/session',
-    async (
-        _,
-        {rejectWithValue}) => {
-        try {
-            const response = await axiosInstance.get('/api/sessions/');
-            return response.data;
-        }
-        catch (error: any) {
-            return rejectWithValue(error.response?.data?.error || 'session fetching failed');
-        }
     },
 );
 
@@ -108,18 +90,6 @@ const authSlice = createSlice({
                                               state.accessToken = null;
                                               state.userId = null;
                                               state.error = null;
-                                          })
-                                          .addCase(fetchSession.pending, (state) => {
-                                              state.loading = true;
-                                              state.error = null;
-                                          })
-                                          .addCase(fetchSession.fulfilled, (state, action) => {
-                                              state.loading = false;
-                                              state.sessionId = action.payload;
-                                          })
-                                          .addCase(fetchSession.rejected, (state, action) => {
-                                              state.loading = false;
-                                              state.error = action.payload as string;
                                           })
                                   },
                               });

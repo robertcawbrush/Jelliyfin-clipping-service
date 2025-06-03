@@ -1,7 +1,6 @@
 import React from 'react';
 import { useAppDispatch, useAppSelector } from '../hooks';
 import { fetchClips } from '../store/slices/clipsSlice';
-import { fetchSession } from '../store/slices/authSlice';
 import { VideoSearch } from '../components/VideoSearch';
 
 export const Dashboard: React.FC = () => {
@@ -10,7 +9,6 @@ export const Dashboard: React.FC = () => {
 
   React.useEffect(() => {
     dispatch(fetchClips());
-    dispatch(fetchSession())
   }, [dispatch]);
 
   if (loading) {

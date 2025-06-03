@@ -17,7 +17,7 @@ export async function handleHlsMasterPlaylist(
     const fixedPlaylist = apiPrependedData.replace(/\\n/g, '\n');
 
     return new Response(JSON.stringify(fixedPlaylist, null, 2), {
-      status: res.status,
+      status: masterPlaylistResponse.status,
       headers: addCorsHeaders(
         new Headers({
                       "Content-Type": "application/vnd.apple.mpegurl",
@@ -40,6 +40,7 @@ export async function handleHlsMasterPlaylist(
 export async function handleHlsMainPlaylist(
     client: JellyfinClient,
     mediaSourceid: string,
+    sessionId: string,
 ): Promise<Response> {
   try {
     const { data, status } = await client.getHlsVariantPlaylist(mediaSourceid);
@@ -48,7 +49,11 @@ export async function handleHlsMainPlaylist(
         /(hls1\/main\/\d+\.ts\?[^ \n\r]*)/g,
         `${client.jcsurl}/api/video-segment/$1`
     );
-    const fixedPlaylist = apiPrependedData.replace(/\\n/g, '\n');
+    const playlistWithSession = apiPrependedData.replace(
+        /(hls1\/main\/\d+\.ts\?[^ \n\r]*)/g,
+        (match) => `${match}&sessionId=${encodeURIComponent(sessionId)}`
+    );
+    const fixedPlaylist = playlistWithSession.replace(/\\n/g, '\n');
 
     return new Response(fixedPlaylist, {
       status: status,
@@ -78,6 +83,7 @@ export async function handleGetVideoSegment(
     container: string,
     runtimeTicks: string,
     actualSegmentLengthTicks: string,
+    sessionId: string,
 ): Promise<Response> {
   try {
     const res = await client.getHlsVideoSegment(
@@ -86,6 +92,7 @@ export async function handleGetVideoSegment(
         container,
         parseInt(runtimeTicks, 10),
         parseInt(actualSegmentLengthTicks, 10),
+        sessionId,
     );
 
     return new Response(res.data, {

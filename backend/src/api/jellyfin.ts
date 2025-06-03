@@ -1,5 +1,6 @@
 import { getDynamicHlsApi } from "@jellyfin/sdk/lib/utils/api/dynamic-hls-api.js";
 import { getSessionApi } from "@jellyfin/sdk/lib/utils/api/session-api.js";
+import { getDevicesApi } from "@jellyfin/sdk/lib/utils/api/devices-api.js";
 
 export interface JellyfinGetItemsParams {
   searchTerm?: string;
@@ -16,13 +17,11 @@ export interface JellyfinGetItemsParams {
   enableImages?: boolean;
   enableUserData?: boolean;
   imageTypeLimit?: number;
-  // Add more parameters as needed
 }
 
 export interface JellyfinMediaStream {
   Codec: string;
   Type: "Video" | "Audio" | "Subtitle";
-  // Add more properties as needed
 }
 
 export interface JellyfinItem {
@@ -45,7 +44,7 @@ export interface JellyfinItemsResponse {
 
 import { Jellyfin } from "@jellyfin/sdk";
 import { AxiosResponse } from "npm:axios@1.8.4";
-import { CLIENT_NAME } from "./constants.ts";
+import { CLIENT_NAME, DEVICE_NAME } from "./constants.ts";
 
 export class JellyfinClient {
   private baseUrl: string;
@@ -71,7 +70,7 @@ export class JellyfinClient {
             version: "1.0.0",
           },
           deviceInfo: {
-            name: "JellyClippingService",
+            name: DEVICE_NAME,
             id: "jelly-clipping-service",
           },
         });
@@ -168,15 +167,18 @@ export class JellyfinClient {
       container: string,
       runtimeTicks: number,
       actualSegmentLengthTicks: number,
+      sessionId: string,
+      playlistId: string,
   ): Promise<AxiosResponse<File, any>> {
     const api = this.getSdkApi();
     const dynamicHlsApi = getDynamicHlsApi(api);
 
     const uuid = crypto.randomUUID();
+    const randomNumber = Math.random * 100;
     return await dynamicHlsApi.getHlsVideoSegment(
         {
           itemId,
-          playlistId: `hls${uuid}`,
+          playlistId: `hls${uuid + randomNumber}`,
           segmentId,
           container,
           runtimeTicks,
@@ -186,12 +188,13 @@ export class JellyfinClient {
           maxWidth: 1920,
           videoCodec: "copy",
           audioCodec: "copy",
-          // i need a specific playSessionId here
-          playSessionId: "12fd74621c7f4e7b869200b86d4e3cc6",
+          // playSessionId: sessionId,
+          playSessionId: "0b6d910c07ad4b7886cd9be0e949dde1",
         },
         { responseType: "arraybuffer" },
     );
   }
+
 }
 
 export async function initJellyfinClient(): Promise<JellyfinClient> {

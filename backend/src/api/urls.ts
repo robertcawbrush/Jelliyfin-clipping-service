@@ -5,7 +5,8 @@ import {
   handleVideoDetails,
   handleVideoSearch,
 } from "../controllers/videoController.ts";
-import { handleGetSessions, handleLogin } from "../controllers/authController.ts";
+import { handleLogin } from "../controllers/authController.ts";
+import { handleGetSessions } from "../controllers/sessionController.ts";
 import {
   handleGetVideoSegment,
   handleHlsMainPlaylist,
@@ -51,17 +52,25 @@ export async function handleRequest(req: Request): Promise<Response> {
     // hls stream routes
     if (url.pathname.startsWith("/api/master-hls-playlist/")) {
       const pathParts = url.pathname.split("/");
-      const videoId = pathParts[3]; // Get the video ID from the path
+      const videoId = pathParts[3];
+      const sessionId = pathParts[4];
+
       if (videoId) {
-        return await handleHlsMasterPlaylist(client, videoId);
+        return await handleHlsMasterPlaylist(client, videoId, sessionId);
       }
     }
 
     if (url.pathname.startsWith("/api/main.m3u8")) {
       const mediaSourceId = url.searchParams.get("mediaSourceId");
 
-      if (mediaSourceId) {
-        return await handleHlsMainPlaylist(client, mediaSourceId);
+      const sessionId = await handleGetSessions(client);
+      const playlist = await handleGetSessions(client);
+      if(!sessionId) {
+        throw new Error("Failed to get Session, try logging out then back in")
+      }
+
+      if (mediaSourceId && sessionId) {
+        return await handleHlsMainPlaylist(client, mediaSourceId, sessionId);
       }
     }
 
@@ -75,13 +84,15 @@ export async function handleRequest(req: Request): Promise<Response> {
       const actualSegmentLengthTicks = url.searchParams.get(
         "actualSegmentLengthTicks",
       );
+      const sessionId = url.searchParams.get("sessionId");
 
       if (
         itemId &&
         runtimeTicks &&
         actualSegmentLengthTicks &&
         segmentId &&
-        container
+        container &&
+        sessionId
       ) {
         return await handleGetVideoSegment(
           client,
@@ -90,6 +101,7 @@ export async function handleRequest(req: Request): Promise<Response> {
           container,
           runtimeTicks,
           actualSegmentLengthTicks,
+          sessionId
         );
       }
     }
@@ -113,11 +125,6 @@ export async function handleRequest(req: Request): Promise<Response> {
     // Auth routes
     if (url.pathname === "/api/auth/login" && req.method === "POST") {
       return await handleLogin(client, req);
-    }
-
-    //Session route
-    if (url.pathname.startsWith("/api/sessions/")) {
-      return await handleGetSessions(client);
     }
 
     // Not found
